@@ -1,0 +1,513 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#02040f;color:#c8d8f0;overflow-x:hidden;position:relative}
+canvas#pcv{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.urg-bar{background:#020b18;border-bottom:1px solid #00b4ff18;padding:7px 1rem;display:flex;align-items:center;justify-content:center;gap:1.2rem;flex-wrap:wrap}
+.urg-item{display:flex;align-items:center;gap:6px;font-size:11px;color:#3a6080}
+.urg-dot{width:6px;height:6px;border-radius:50%;background:#00ff88;box-shadow:0 0 5px #00ff88;animation:blink 1.5s infinite;flex-shrink:0}
+.urg-dot.r{background:#ff4466;box-shadow:0 0 5px #ff4466}
+.urg-val{color:#00b4ff;font-weight:500}
+
+nav{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.2rem;border-bottom:1px solid #0e1a33;background:#02040fee;position:sticky;top:0;z-index:100;backdrop-filter:blur(8px)}
+.logo{font-size:16px;font-weight:500;letter-spacing:.1em;color:#fff}
+.logo span{color:#00b4ff}
+.logo small{font-size:9px;color:#1e3a5a;letter-spacing:.12em;margin-left:4px;text-transform:uppercase}
+.nav-r{display:flex;align-items:center;gap:10px}
+.nav-btn{font-size:12px;padding:7px 14px;border-radius:8px;background:transparent;color:#00b4ff;border:1px solid #00b4ff55;cursor:pointer;transition:all .2s}
+.nav-btn:hover{background:#00b4ff18}
+.lang-btn{background:transparent;border:1px solid #00b4ff44;color:#00b4ff;font-size:12px;padding:5px 12px;border-radius:8px;cursor:pointer}
+
+.hero{padding:3.5rem 1.2rem 2.5rem;text-align:center;position:relative;display:flex;flex-direction:column;align-items:center}
+.hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:500px;height:250px;background:radial-gradient(ellipse at center,#00b4ff14,transparent 70%);pointer-events:none}
+.tag{display:inline-flex;align-items:center;gap:7px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#00b4ff;border:1px solid #00b4ff33;background:#00b4ff0a;padding:4px 13px;border-radius:999px;margin-bottom:1.4rem}
+.tag-dot{width:5px;height:5px;border-radius:50%;background:#00b4ff;box-shadow:0 0 5px #00b4ff;animation:blink 1.5s infinite}
+
+.hero h1{font-size:clamp(26px,7vw,48px);font-weight:500;line-height:1.15;color:#fff;margin-bottom:.9rem;max-width:640px}
+.tw-line{display:block;min-height:1.3em;font-size:clamp(26px,7vw,48px);font-weight:500;color:#00b4ff;text-shadow:0 0 25px #00b4ff28}
+.cur{display:inline-block;width:2px;height:.85em;background:#00b4ff;margin-left:2px;vertical-align:middle;animation:blink .8s infinite}
+
+.hero-sub{font-size:clamp(13px,3vw,15px);color:#3a6080;line-height:1.7;max-width:400px;margin:0 auto 1.8rem}
+.btns{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-bottom:1.8rem;width:100%}
+.btn{padding:12px 24px;border-radius:10px;background:#00b4ff;color:#000;font-size:14px;font-weight:500;border:none;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-block;text-align:center}
+.btn:hover{background:#33c2ff;transform:translateY(-1px)}
+.btn-o{background:transparent;color:#3a6080;border:1px solid #0e1a33;color:#3a6080}
+.btn-o:hover{border-color:#00b4ff44;color:#00b4ff;background:transparent}
+
+.stats{display:grid;grid-template-columns:repeat(2,1fr);border:1px solid #0e1a33;border-radius:12px;overflow:hidden;width:100%;max-width:640px;background:#030712aa}
+.stat{padding:.9rem;text-align:center;border-right:1px solid #0e1a33;border-bottom:1px solid #0e1a33}
+.stat:nth-child(2){border-right:none}
+.stat:nth-child(3){border-bottom:none}
+.stat:nth-child(4){border-right:none;border-bottom:none}
+.stat-v{font-size:20px;font-weight:500;color:#00b4ff;line-height:1;margin-bottom:2px;text-shadow:0 0 12px #00b4ff44}
+.stat-l{font-size:10px;color:#1e3a5a;letter-spacing:.05em;text-transform:uppercase}
+
+.div{height:1px;background:linear-gradient(90deg,transparent,#00b4ff1a,transparent)}
+.sec{padding:2.5rem 1.2rem;max-width:900px;margin:0 auto}
+.eyebrow{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#00b4ff;text-align:center;margin-bottom:.4rem}
+.sec-t{font-size:clamp(20px,4vw,28px);font-weight:500;color:#fff;text-align:center;margin-bottom:1.8rem}
+
+.gal{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.gc{border-radius:11px;overflow:hidden;border:1px solid #0e1a33;background:#030712;transition:all .3s;cursor:pointer}
+.gc:hover{border-color:#00b4ff44;transform:translateY(-2px)}
+.gt{height:95px;display:flex;align-items:center;justify-content:center;font-size:38px;background:#04091a;position:relative}
+.gt::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,#030712 100%)}
+.gi{padding:.6rem .8rem}
+.gn{font-size:12px;font-weight:500;color:#c8d8f0;margin-bottom:2px}
+.gp{font-size:12px;color:#00b4ff}
+.gb{font-size:9px;padding:2px 6px;border-radius:999px;background:#00b4ff11;color:#00b4ff;border:1px solid #00b4ff33;float:right;margin-top:1px}
+
+/* BEFORE AFTER */
+.ba-outer{max-width:900px;margin:0 auto;padding:0 1.2rem 2.5rem}
+.ba-wrap{position:relative;border-radius:13px;overflow:hidden;border:1px solid #0e1a33;cursor:col-resize;user-select:none;height:200px}
+.ba-side{position:absolute;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;width:100%}
+.ba-after{background:#020d1a;left:0;right:0}
+.ba-before-clip{position:absolute;top:0;bottom:0;left:0;overflow:hidden;background:#0a1a0a}
+.ba-before-inner{position:absolute;top:0;bottom:0;left:0;right:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.ba-icon{font-size:48px;line-height:1}
+.ba-label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:500}
+.ba-before-inner .ba-label{color:#1e3a5a}
+.ba-after .ba-label{color:#00b4ff}
+.ba-before-inner .ba-desc{font-size:11px;color:#1e3a5a;text-align:center;padding:0 1rem}
+.ba-after .ba-desc{font-size:11px;color:#3a6080;text-align:center;padding:0 1rem}
+.ba-handle{position:absolute;top:0;bottom:0;width:3px;background:#00b4ff;z-index:5;transform:translateX(-50%)}
+.ba-handle::after{content:'◀ ▶';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:34px;height:34px;background:#00b4ff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;line-height:34px;text-align:center;white-space:nowrap}
+.ba-hint{font-size:11px;color:#1e3a5a;text-align:center;margin-top:.5rem}
+
+.slot-s{padding:.5rem 1.2rem 1.8rem}
+.slot-b{max-width:900px;margin:0 auto;background:#04091a;border:1px solid #ff446633;border-radius:13px;padding:1.1rem 1.2rem;display:flex;flex-direction:column;gap:.8rem}
+.slot-l{display:flex;align-items:center;gap:9px}
+.slot-d{width:8px;height:8px;border-radius:50%;background:#ff4466;box-shadow:0 0 8px #ff4466;animation:blink 1s infinite;flex-shrink:0}
+.slot-t{font-size:13px;color:#c8d8f0;line-height:1.4}
+.slot-t strong{color:#ff4466}
+.bar-bg{height:4px;background:#0e1a33;border-radius:999px;overflow:hidden}
+.bar-f{height:100%;width:75%;background:#ff4466;border-radius:999px;box-shadow:0 0 6px #ff4466}
+.bar-s{font-size:10px;color:#3a6080;margin-top:3px}
+
+.rev-s{padding:2.5rem 1.2rem;background:#030712}
+.rev-i{max-width:900px;margin:0 auto}
+.rev-g{display:grid;grid-template-columns:1fr;gap:9px;margin-top:1.8rem}
+.rc{background:#04091a;border:1px solid #0e1a33;border-radius:12px;padding:1.1rem;transition:border-color .3s}
+.rc:hover{border-color:#00b4ff33}
+.rt{display:flex;align-items:center;gap:9px;margin-bottom:.7rem}
+.rav{width:34px;height:34px;border-radius:50%;background:#00b4ff18;border:1px solid #00b4ff33;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#00b4ff;flex-shrink:0}
+.rn{font-size:13px;font-weight:500;color:#c8d8f0}
+.rl{font-size:11px;color:#1e3a5a}
+.rs{color:#00b4ff;font-size:12px;margin-bottom:.4rem}
+.rtx{font-size:13px;color:#3a6080;line-height:1.6}
+.rbg{display:inline-block;font-size:9px;padding:2px 7px;border-radius:999px;background:#00ff8811;color:#00ff88;border:1px solid #00ff8833;margin-top:.7rem}
+
+.why-g{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.wc{background:#030712;border:1px solid #0e1a33;border-radius:12px;padding:1.1rem;transition:all .3s;position:relative;overflow:hidden}
+.wc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#00b4ff,transparent);opacity:0;transition:opacity .3s}
+.wc:hover::before{opacity:1}
+.wc:hover{border-color:#00b4ff33}
+.wi{font-size:19px;margin-bottom:.7rem}
+.wc h3{font-size:12px;font-weight:500;color:#c8d8f0;margin-bottom:.25rem}
+.wc p{font-size:11px;color:#1e3a5a;line-height:1.5}
+
+.price-bg{background:#030712;padding:2.5rem 1.2rem}
+.pb{max-width:860px;margin:0 auto;background:#04091a;border:1px solid #00b4ff33;border-radius:15px;padding:1.8rem 1.4rem;text-align:center}
+.pt{font-size:10px;color:#00b4ff;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem}
+.pbig{font-size:15px;font-weight:500;color:#fff;margin-bottom:.3rem}
+.pbig span{color:#00b4ff;font-size:32px;text-shadow:0 0 16px #00b4ff55}
+.psub{font-size:12px;color:#1e3a5a;margin-bottom:1.3rem}
+.pfs{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.3rem}
+.pf{display:flex;align-items:center;gap:6px;font-size:11px;color:#3a6080}
+.pd{width:4px;height:4px;border-radius:50%;background:#00b4ff;flex-shrink:0}
+
+.steps-g{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem;margin-top:1.8rem}
+.si{text-align:center;padding:0 .4rem}
+.sc{width:38px;height:38px;border-radius:50%;background:#030712;border:1px solid #00b4ff55;display:flex;align-items:center;justify-content:center;margin:0 auto .9rem;font-size:12px;font-weight:500;color:#00b4ff;box-shadow:0 0 10px #00b4ff14}
+.si h4{font-size:12px;font-weight:500;color:#c8d8f0;margin-bottom:.25rem}
+.si p{font-size:11px;color:#1e3a5a;line-height:1.5}
+
+.cta-s{padding:3.5rem 1.2rem;text-align:center}
+.cta-i{max-width:480px;margin:0 auto}
+.cta-i h2{font-size:clamp(20px,5vw,30px);font-weight:500;color:#fff;margin-bottom:.7rem;line-height:1.2}
+.cta-i p{font-size:14px;color:#3a6080;margin-bottom:1.6rem;line-height:1.7}
+
+.wa{position:fixed;bottom:80px;right:16px;z-index:300;width:52px;height:52px;border-radius:50%;background:#25d366;border:2px solid #1ab854;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 4px 20px #25d36644;transition:transform .2s}
+.wa:hover{transform:scale(1.1)}
+.wa-tip{position:absolute;right:60px;top:50%;transform:translateY(-50%);background:#04091a;border:1px solid #0e1a33;color:#c8d8f0;font-size:12px;padding:6px 12px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s}
+.wa:hover .wa-tip{opacity:1}
+
+.mob-cta{display:none;position:fixed;bottom:0;left:0;right:0;background:#02040fee;border-top:1px solid #0e1a33;padding:10px 1.2rem;gap:9px;z-index:200;backdrop-filter:blur(8px)}
+
+footer{padding:1.2rem 1.2rem 5.5rem;border-top:1px solid #0a1020;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+.fl{font-size:12px;color:#1e3a5a;letter-spacing:.08em}
+.fl span{color:#00b4ff}
+.fc{font-size:11px;color:#0e1a33}
+
+@media(min-width:601px){
+  .stats{grid-template-columns:repeat(4,1fr)}
+  .stat{border-bottom:none}
+  .stat:nth-child(2){border-right:1px solid #0e1a33}
+  .stat:last-child{border-right:none}
+  .gal{grid-template-columns:repeat(3,1fr)}
+  .rev-g{grid-template-columns:repeat(3,1fr)}
+  .why-g{grid-template-columns:repeat(4,1fr)}
+  .steps-g{grid-template-columns:repeat(4,1fr)}
+  .slot-b{flex-direction:row;align-items:center}
+  .wa{bottom:24px}
+  footer{padding-bottom:1.2rem}
+}
+@media(max-width:600px){
+  .urg-item:last-child{display:none}
+  .mob-cta{display:flex}
+  footer{padding-bottom:5.5rem}
+  .btns{flex-direction:column;align-items:stretch}
+  .btn{max-width:100%;text-align:center}
+}
+</style>
+
+<canvas id="pcv"></canvas>
+<div class="wrap">
+
+  <div class="urg-bar">
+    <div class="urg-item"><span class="urg-dot"></span><span id="t-aktiv">Aktív:</span> <span class="urg-val" id="ao">3</span> <span id="t-rendeles">rendelés</span></div>
+    <div class="urg-item"><span class="urg-dot r"></span><span id="t-slot">Szabad slot:</span> <span class="urg-val">2</span> / 8</div>
+    <div class="urg-item"><span class="urg-dot"></span><span id="t-valasz">Válasz: ~4 óra</span></div>
+  </div>
+
+  <nav>
+    <div class="logo">PRINT<span>3D</span><small>lab</small></div>
+    <div class="nav-r">
+      <button class="lang-btn" id="lang-btn">🌐 EN</button>
+      <button class="nav-btn" id="t-nav-btn">Rendelés →</button>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="tag"><span class="tag-dot"></span><span id="t-tag">Helyi gyártás · Gyors átfutás</span></div>
+    <h1><span id="t-h1">3D nyomtatás —</span><br><span class="tw-line"><span id="tw"></span><span class="cur"></span></span></h1>
+    <p class="hero-sub" id="t-sub">Egyedi termékek, alkatrészek, designdarabok. Kézzel, filamentről — neked, a régióban.</p>
+    <div class="btns">
+      <button class="btn" id="t-btn1">Egyedi rendelés →</button>
+      <button class="btn btn-o" id="t-btn2">Termékek böngészése</button>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-v" id="c1">48h</div><div class="stat-l" id="t-s1">Átlag átfutás</div></div>
+      <div class="stat"><div class="stat-v" id="c2">100%</div><div class="stat-l" id="t-s2">Egyedi gyártás</div></div>
+      <div class="stat"><div class="stat-v" id="c3">–30%</div><div class="stat-l" id="t-s3">Versenytárshoz képest</div></div>
+      <div class="stat"><div class="stat-v">📹</div><div class="stat-l" id="t-s4">Videó rendeléshez</div></div>
+    </div>
+  </section>
+
+  <div class="div"></div>
+
+  <section class="sec">
+    <div class="eyebrow" id="t-gal-ey">Munkáink</div>
+    <div class="sec-t" id="t-gal-t">Friss a nyomtatóból</div>
+    <div class="gal">
+      <div class="gc"><div class="gt">🗿</div><div class="gi"><div class="gn"><span id="tg1">Geometrikus szobor</span><span class="gb" id="tgb1">raktáron</span></div><div class="gp">2 490 Ft</div></div></div>
+      <div class="gc"><div class="gt">🧩</div><div class="gi"><div class="gn"><span id="tg2">Moduláris rendező</span><span class="gb" id="tgb2">egyedi</span></div><div class="gp">3 990 Ft</div></div></div>
+      <div class="gc"><div class="gt">⚙️</div><div class="gi"><div class="gn"><span id="tg3">Alkatrész nyomtatás</span><span class="gb" id="tgb3">rendelésre</span></div><div class="gp" id="tgp3">igény szerint</div></div></div>
+      <div class="gc"><div class="gt">🎮</div><div class="gi"><div class="gn"><span id="tg4">Cosplay kellék</span><span class="gb" id="tgb4">egyedi</span></div><div class="gp">4 500 Ft-tól</div></div></div>
+      <div class="gc"><div class="gt">🏷️</div><div class="gi"><div class="gn"><span id="tg5">Névtábla</span><span class="gb" id="tgb5">raktáron</span></div><div class="gp">1 990 Ft</div></div></div>
+      <div class="gc"><div class="gt">🎁</div><div class="gi"><div class="gn"><span id="tg6">Egyedi ajándék</span><span class="gb" id="tgb6">rendelésre</span></div><div class="gp">2 900 Ft-tól</div></div></div>
+    </div>
+  </section>
+
+  <!-- BEFORE / AFTER -->
+  <div class="ba-outer">
+    <div class="eyebrow" id="t-ba-ey">Előtte / Utána</div>
+    <div class="sec-t" id="t-ba-t" style="margin-bottom:1rem">Filamentből — kész termék</div>
+    <div class="ba-wrap" id="ba">
+      <div class="ba-side ba-after">
+        <div class="ba-icon">🗿</div>
+        <div class="ba-label" id="t-after">UTÁNA</div>
+        <div class="ba-desc" id="t-after-desc">Kész 3D nyomtatott termék — 48 óra alatt</div>
+      </div>
+      <div class="ba-before-clip" id="ba-clip" style="width:50%">
+        <div class="ba-before-inner">
+          <div class="ba-icon">🧵</div>
+          <div class="ba-label" id="t-before">ELŐTTE</div>
+          <div class="ba-desc" id="t-before-desc">Nyers filament tekercs — csak az alapanyag</div>
+        </div>
+      </div>
+      <div class="ba-handle" id="ba-handle" style="left:50%"></div>
+    </div>
+    <div class="ba-hint" id="t-ba-hint">← Húzd jobbra-balra →</div>
+  </div>
+
+  <section class="slot-s">
+    <div class="slot-b">
+      <div class="slot-l"><span class="slot-d"></span><div class="slot-t" id="t-slot-txt">Ezen a héten csak <strong>2 szabad slot</strong> maradt!</div></div>
+      <div><div class="bar-bg"><div class="bar-f"></div></div><div class="bar-s" id="t-bar-s">6 / 8 slot foglalt</div></div>
+      <button class="btn" id="t-slot-btn">Foglalom →</button>
+    </div>
+  </section>
+
+  <div class="div"></div>
+
+  <section class="rev-s">
+    <div class="rev-i">
+      <div class="eyebrow" id="t-rev-ey">Vélemények</div>
+      <div class="sec-t" id="t-rev-t">Mit mondanak a vevők</div>
+      <div class="rev-g">
+        <div class="rc"><div class="rt"><div class="rav">KM</div><div><div class="rn">Kovács Márton</div><div class="rl">Miskolc</div></div></div><div class="rs">★★★★★</div><div class="rtx" id="tr1">"Törött alkatrészt nyomtattak, pontosan passzolt. Másnap már nálam volt — olcsóbb mint bárhol."</div><div class="rbg" id="trb1">✓ Visszatérő vevő</div></div>
+        <div class="rc"><div class="rt"><div class="rav">SV</div><div><div class="rn">Szabó Vivien</div><div class="rl">Eger</div></div></div><div class="rs">★★★★★</div><div class="rtx" id="tr2">"A videót amit küldtek teljesen lenyűgözött. Ajándékba rendeltem, a barátom imádta!"</div><div class="rbg" id="trb2">✓ Ellenőrzött vásárlás</div></div>
+        <div class="rc"><div class="rt"><div class="rav">TZ</div><div><div class="rn">Tóth Zoltán</div><div class="rl">Miskolc</div></div></div><div class="rs">★★★★★</div><div class="rtx" id="tr3">"Prototípust kértem. Gyors, precíz, az ár meg sem közelítette amit máshol kértek."</div><div class="rbg" id="trb3">✓ Üzleti megrendelő</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="eyebrow" id="t-why-ey">Miért mi?</div>
+    <div class="sec-t" id="t-why-t">Technológia, ami megbízható</div>
+    <div class="why-g">
+      <div class="wc"><div class="wi">💰</div><h3 id="tw1">Jobb ár</h3><p id="twp1">Helyi gyártás, alacsony rezsi. Rejtett díjak nélkül.</p></div>
+      <div class="wc"><div class="wi">📹</div><h3 id="tw2h">Videó</h3><p id="twp2">Minden rendelésről felvételt kapsz.</p></div>
+      <div class="wc"><div class="wi">📍</div><h3 id="tw3h">Helyi</h3><p id="twp3">Személyes átvétel is van.</p></div>
+      <div class="wc"><div class="wi">⚙️</div><h3 id="tw4h">Egyedi</h3><p id="twp4">Saját fájl vagy ötlet — mind a tiéd.</p></div>
+    </div>
+  </section>
+
+  <div class="price-bg">
+    <div class="pb">
+      <div class="pt" id="t-pr-ey">⚡ Garanciánk</div>
+      <div class="pbig" id="t-pr-big">Átlagosan <span>30%</span>-kal olcsóbb</div>
+      <div class="psub" id="t-pr-sub">mint az online szolgáltatók — felesleges marzsok nélkül</div>
+      <div class="pfs">
+        <div class="pf"><span class="pd"></span><span id="tpf1">Ingyenes árajánlat</span></div>
+        <div class="pf"><span class="pd"></span><span id="tpf2">Nincs rejtett díj</span></div>
+        <div class="pf"><span class="pd"></span><span id="tpf3">Garanciális csere</span></div>
+      </div>
+      <button class="btn" id="t-pr-btn">Ingyenes árajánlat →</button>
+    </div>
+  </div>
+
+  <section class="sec">
+    <div class="eyebrow" id="t-st-ey">A folyamat</div>
+    <div class="sec-t" id="t-st-t">4 lépés, és kész</div>
+    <div class="steps-g">
+      <div class="si"><div class="sc">01</div><h4 id="ts1">Írj nekünk</h4><p id="tsp1">Elképzelés vagy fájl — bármi elég.</p></div>
+      <div class="si"><div class="sc">02</div><h4 id="ts2">Árajánlat 24h</h4><p id="tsp2">Pontos ár és átfutási idő.</p></div>
+      <div class="si"><div class="sc">03</div><h4 id="ts3">Nyomtatás</h4><p id="tsp3">Videót kapsz a folyamatról.</p></div>
+      <div class="si"><div class="sc">04</div><h4 id="ts4">Szállítás</h4><p id="tsp4">MPL, GLS, vagy személyesen.</p></div>
+    </div>
+  </section>
+
+  <div class="div"></div>
+
+  <section class="cta-s">
+    <div class="cta-i">
+      <div class="eyebrow" id="t-cta-ey">Kezdjük el</div>
+      <h2 id="t-cta-h">Az ötleted már félúton van</h2>
+      <p id="t-cta-p">Írj egy üzenetet — 24 órán belül visszajelzünk.</p>
+      <div class="btns">
+        <button class="btn" id="t-cta-btn1">Rendelés indítása →</button>
+        <button class="btn btn-o" id="t-cta-btn2">Kérdésem van</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="fl">PRINT<span>3D</span>lab</div>
+    <div class="fc" id="t-footer">© 2026 · Helyi gyártás, valódi minőség</div>
+  </footer>
+</div>
+
+<button class="wa" onclick="window.open('https://wa.me/36701234567','_blank')">
+  💬<span class="wa-tip" id="t-wa-tip">Írj WhatsAppon!</span>
+</button>
+
+<div class="mob-cta">
+  <button class="btn" style="flex:1" id="t-mob1">Rendelés →</button>
+  <button class="btn btn-o" style="flex:1" id="t-mob2">Árajánlat</button>
+</div>
+
+<script>
+const cv=document.getElementById('pcv'),cx=cv.getContext('2d');
+let W,H,ps=[];
+function rsz(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight;}
+function iPs(){ps=[];const n=Math.floor(W*H/13000);for(let i=0;i<n;i++)ps.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.3+.4,a:Math.random()*Math.PI*2});}
+function drw(){
+  cx.clearRect(0,0,W,H);
+  for(let i=0;i<ps.length;i++){
+    const p=ps[i];p.x+=p.vx;p.y+=p.vy;p.a+=.005;
+    if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+    const al=(Math.sin(p.a)*.3+.4).toFixed(2);
+    cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);cx.fillStyle='rgba(0,180,255,'+al+')';cx.fill();
+    for(let j=i+1;j<ps.length;j++){
+      const q=ps[j],dx=p.x-q.x,dy=p.y-q.y,d=Math.sqrt(dx*dx+dy*dy);
+      if(d<100){cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(q.x,q.y);cx.strokeStyle='rgba(0,180,255,'+((1-d/100)*.09).toFixed(3)+')';cx.lineWidth=.5;cx.stroke();}
+    }
+  }
+  requestAnimationFrame(drw);
+}
+rsz();iPs();drw();
+window.addEventListener('resize',()=>{rsz();iPs();});
+
+// TYPEWRITER — javított
+const phrHU=['profi szinten.','nem profi áron.','rétegről rétegre.','neked csinálva.'];
+const phrEN=['at a pro level.','not at pro prices.','layer by layer.','made for you.'];
+let lang='hu',pi=0,ci=0,del=false,twTimer=null;
+const twEl=document.getElementById('tw');
+function startTw(){
+  if(twTimer)clearTimeout(twTimer);
+  ci=0;del=false;
+  twEl.textContent='';
+  tick();
+}
+function tick(){
+  const phr=lang==='hu'?phrHU:phrEN;
+  const ph=phr[pi%phr.length];
+  if(!del){
+    twEl.textContent=ph.slice(0,ci+1);
+    ci++;
+    if(ci===ph.length){del=true;twTimer=setTimeout(tick,1800);}
+    else twTimer=setTimeout(tick,80);
+  } else {
+    twEl.textContent=ph.slice(0,ci-1);
+    ci--;
+    if(ci===0){del=false;pi++;twTimer=setTimeout(tick,300);}
+    else twTimer=setTimeout(tick,40);
+  }
+}
+setTimeout(startTw,400);
+
+// BEFORE / AFTER
+const ba=document.getElementById('ba');
+const baClip=document.getElementById('ba-clip');
+const baHandle=document.getElementById('ba-handle');
+let drag=false;
+function setBA(x){
+  const r=ba.getBoundingClientRect();
+  const pct=Math.min(Math.max((x-r.left)/r.width,0.05),0.95)*100;
+  baClip.style.width=pct+'%';
+  baHandle.style.left=pct+'%';
+}
+ba.addEventListener('mousedown',e=>{drag=true;setBA(e.clientX);});
+ba.addEventListener('touchstart',e=>{drag=true;setBA(e.touches[0].clientX);},{passive:true});
+window.addEventListener('mousemove',e=>{if(drag)setBA(e.clientX);});
+window.addEventListener('touchmove',e=>{if(drag)setBA(e.touches[0].clientX);},{passive:true});
+window.addEventListener('mouseup',()=>drag=false);
+window.addEventListener('touchend',()=>drag=false);
+
+// COUNTER ANIMATION
+function animCount(el,target,prefix,suffix){
+  let s=null;
+  function step(ts){if(!s)s=ts;const p=Math.min((ts-s)/1000,1);el.textContent=(prefix||'')+Math.round(p*target)+(suffix||'');if(p<1)requestAnimationFrame(step);}
+  requestAnimationFrame(step);
+}
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const id=e.target.id;
+      if(id==='c1')animCount(e.target,48,'','h');
+      else if(id==='c2')animCount(e.target,100,'','%');
+      else if(id==='c3')animCount(e.target,30,'–','%');
+      obs.unobserve(e.target);
+    }
+  });
+},{threshold:.5});
+['c1','c2','c3'].forEach(id=>{const el=document.getElementById(id);if(el)obs.observe(el);});
+
+// LANGUAGE
+const T={
+  hu:{
+    'lang-btn':'🌐 EN','t-aktiv':'Aktív:','t-rendeles':'rendelés','t-slot':'Szabad slot:','t-valasz':'Válasz: ~4 óra',
+    'nav-btn':'Rendelés →','t-tag':'Helyi gyártás · Gyors átfutás','t-h1':'3D nyomtatás —',
+    't-sub':'Egyedi termékek, alkatrészek, designdarabok. Kézzel, filamentről — neked, a régióban.',
+    't-btn1':'Egyedi rendelés →','t-btn2':'Termékek böngészése',
+    't-s1':'Átlag átfutás','t-s2':'Egyedi gyártás','t-s3':'Versenytárshoz képest','t-s4':'Videó rendeléshez',
+    't-gal-ey':'Munkáink','t-gal-t':'Friss a nyomtatóból',
+    'tg1':'Geometrikus szobor','tgb1':'raktáron','tg2':'Moduláris rendező','tgb2':'egyedi',
+    'tg3':'Alkatrész nyomtatás','tgb3':'rendelésre','tgp3':'igény szerint',
+    'tg4':'Cosplay kellék','tgb4':'egyedi','tg5':'Névtábla','tgb5':'raktáron','tg6':'Egyedi ajándék','tgb6':'rendelésre',
+    't-ba-ey':'Előtte / Utána','t-ba-t':'Filamentből — kész termék',
+    't-before':'ELŐTTE','t-before-desc':'Nyers filament tekercs — csak az alapanyag',
+    't-after':'UTÁNA','t-after-desc':'Kész 3D nyomtatott termék — 48 óra alatt',
+    't-ba-hint':'← Húzd jobbra-balra →',
+    't-slot-txt':'Ezen a héten csak <strong>2 szabad slot</strong> maradt!','t-bar-s':'6 / 8 slot foglalt','t-slot-btn':'Foglalom →',
+    't-rev-ey':'Vélemények','t-rev-t':'Mit mondanak a vevők',
+    'tr1':'"Törött alkatrészt nyomtattak, pontosan passzolt. Másnap már nálam volt — olcsóbb mint bárhol."',
+    'trb1':'✓ Visszatérő vevő',
+    'tr2':'"A videót amit küldtek teljesen lenyűgözött. Ajándékba rendeltem, a barátom imádta!"',
+    'trb2':'✓ Ellenőrzött vásárlás',
+    'tr3':'"Prototípust kértem. Gyors, precíz, az ár meg sem közelítette amit máshol kértek."',
+    'trb3':'✓ Üzleti megrendelő',
+    't-why-ey':'Miért mi?','t-why-t':'Technológia, ami megbízható',
+    'tw1':'Jobb ár','twp1':'Helyi gyártás, alacsony rezsi. Rejtett díjak nélkül.',
+    'tw2h':'Videó','twp2':'Minden rendelésről felvételt kapsz.',
+    'tw3h':'Helyi','twp3':'Személyes átvétel is van.',
+    'tw4h':'Egyedi','twp4':'Saját fájl vagy ötlet — mind a tiéd.',
+    't-pr-ey':'⚡ Garanciánk','t-pr-big':'Átlagosan <span>30%</span>-kal olcsóbb',
+    't-pr-sub':'mint az online szolgáltatók — felesleges marzsok nélkül',
+    'tpf1':'Ingyenes árajánlat','tpf2':'Nincs rejtett díj','tpf3':'Garanciális csere',
+    't-pr-btn':'Ingyenes árajánlat →',
+    't-st-ey':'A folyamat','t-st-t':'4 lépés, és kész',
+    'ts1':'Írj nekünk','tsp1':'Elképzelés vagy fájl — bármi elég.',
+    'ts2':'Árajánlat 24h','tsp2':'Pontos ár és átfutási idő.',
+    'ts3':'Nyomtatás','tsp3':'Videót kapsz a folyamatról.',
+    'ts4':'Szállítás','tsp4':'MPL, GLS, vagy személyesen.',
+    't-cta-ey':'Kezdjük el','t-cta-h':'Az ötleted már félúton van',
+    't-cta-p':'Írj egy üzenetet — 24 órán belül visszajelzünk.',
+    't-cta-btn1':'Rendelés indítása →','t-cta-btn2':'Kérdésem van',
+    't-footer':'© 2026 · Helyi gyártás, valódi minőség',
+    't-wa-tip':'Írj WhatsAppon!','t-mob1':'Rendelés →','t-mob2':'Árajánlat',
+    't-nav-btn':'Rendelés →'
+  },
+  en:{
+    'lang-btn':'🌐 HU','t-aktiv':'Active:','t-rendeles':'orders','t-slot':'Free slot:','t-valasz':'Response: ~4 hrs',
+    'nav-btn':'Order →','t-tag':'Local production · Fast turnaround','t-h1':'3D printing —',
+    't-sub':'Custom products, parts, design pieces. Handmade, layer by layer — for you, locally.',
+    't-btn1':'Custom order →','t-btn2':'Browse products',
+    't-s1':'Avg. turnaround','t-s2':'Custom made','t-s3':'vs competitors','t-s4':'Video per order',
+    't-gal-ey':'Our work','t-gal-t':'Fresh from the printer',
+    'tg1':'Geometric sculpture','tgb1':'in stock','tg2':'Modular organizer','tgb2':'custom',
+    'tg3':'Part printing','tgb3':'on order','tgp3':'on request',
+    'tg4':'Cosplay prop','tgb4':'custom','tg5':'Name plate','tgb5':'in stock','tg6':'Custom gift','tgb6':'on order',
+    't-ba-ey':'Before / After','t-ba-t':'From filament — to finished product',
+    't-before':'BEFORE','t-before-desc':'Raw filament spool — just the material',
+    't-after':'AFTER','t-after-desc':'Finished 3D printed product — within 48 hours',
+    't-ba-hint':'← Drag left-right →',
+    't-slot-txt':'Only <strong>2 free slots</strong> left this week!','t-bar-s':'6 / 8 slots taken','t-slot-btn':'Reserve →',
+    't-rev-ey':'Reviews','t-rev-t':'What customers say',
+    'tr1':'"They printed a broken part, fit perfectly. Arrived next day — cheaper than anywhere."',
+    'trb1':'✓ Returning customer',
+    'tr2':'"The video they sent was amazing. I ordered it as a gift, my friend loved it!"',
+    'trb2':'✓ Verified purchase',
+    'tr3':'"Asked for a prototype. Fast, precise, price didn\'t come close to what others charge."',
+    'trb3':'✓ Business customer',
+    't-why-ey':'Why us?','t-why-t':'Technology you can trust',
+    'tw1':'Better price','twp1':'Local production, low overhead. No hidden fees.',
+    'tw2h':'Video','twp2':'You get a recording of every order.',
+    'tw3h':'Local','twp3':'Personal pickup available.',
+    'tw4h':'Custom','twp4':'Your file or idea — it\'s all yours.',
+    't-pr-ey':'⚡ Our guarantee','t-pr-big':'On average <span>30%</span> cheaper',
+    't-pr-sub':'than online services — no unnecessary margins',
+    'tpf1':'Free quote','tpf2':'No hidden fees','tpf3':'Warranty replacement',
+    't-pr-btn':'Free quote →',
+    't-st-ey':'The process','t-st-t':'4 steps, done',
+    'ts1':'Write to us','tsp1':'Idea or file — anything works.',
+    'ts2':'Quote in 24h','tsp2':'Exact price and turnaround.',
+    'ts3':'Printing','tsp3':'You get a video of the process.',
+    'ts4':'Delivery','tsp4':'MPL, GLS, or in person.',
+    't-cta-ey':'Let\'s start','t-cta-h':'Your idea is halfway there',
+    't-cta-p':'Send a message — we\'ll reply within 24 hours.',
+    't-cta-btn1':'Start order →','t-cta-btn2':'I have a question',
+    't-footer':'© 2026 · Local production, real quality',
+    't-wa-tip':'Message on WhatsApp!','t-mob1':'Order →','t-mob2':'Quote',
+    't-nav-btn':'Order →'
+  }
+};
+
+document.getElementById('lang-btn').addEventListener('click',()=>{
+  lang=lang==='hu'?'en':'hu';
+  const d=T[lang];
+  Object.keys(d).forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.innerHTML=d[id];
+  });
+  pi=0;startTw();
+});
+
+setInterval(()=>{if(Math.random()>.7)document.getElementById('ao').textContent=Math.floor(Math.random()*3)+2;},8000);
+</script>

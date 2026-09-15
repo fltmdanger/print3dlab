@@ -1,465 +1,443 @@
-<!DOCTYPE html>
-<html lang="hu">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Print3DLab – 3D nyomtatás helyben, profi áron</title>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#02040f;color:#c8d8f0;overflow-x:hidden}
-    canvas#pcv{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
-    .wrap{position:relative;z-index:1}
-    @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 
-    /* URGENCY */
-    .urg-bar{background:#020b18;border-bottom:1px solid #00b4ff18;padding:7px 1rem;display:flex;align-items:center;justify-content:center;gap:1.2rem;flex-wrap:wrap}
-    .urg-item{display:flex;align-items:center;gap:6px;font-size:11px;color:#3a6080}
-    .urg-dot{width:6px;height:6px;border-radius:50%;background:#00ff88;box-shadow:0 0 5px #00ff88;animation:blink 1.5s infinite;flex-shrink:0}
-    .urg-dot.r{background:#ff4466;box-shadow:0 0 5px #ff4466}
-    .urg-val{color:#00b4ff;font-weight:500}
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#02040f;color:#c8d8f0;overflow-x:hidden}
+canvas#pcv{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
-    /* NAV */
-    nav{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.2rem;border-bottom:1px solid #0e1a33;background:#02040fee;position:sticky;top:0;z-index:100;backdrop-filter:blur(8px)}
-    .logo{font-size:16px;font-weight:500;letter-spacing:.1em;color:#fff}
-    .logo span{color:#00b4ff}
-    .logo small{font-size:9px;color:#1e3a5a;letter-spacing:.12em;margin-left:4px;text-transform:uppercase}
-    .nav-r{display:flex;align-items:center;gap:10px}
-    .nav-btn{font-size:12px;padding:7px 14px;border-radius:8px;background:transparent;color:#00b4ff;border:1px solid #00b4ff55;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-block}
-    .nav-btn:hover{background:#00b4ff18}
-    .lang-btn{background:transparent;border:1px solid #00b4ff44;color:#00b4ff;font-size:12px;padding:5px 12px;border-radius:8px;cursor:pointer}
+/* URGENCY */
+.urg-bar{background:#020b18;border-bottom:1px solid #00b4ff18;padding:7px 1rem;display:flex;align-items:center;justify-content:center;gap:1.2rem;flex-wrap:wrap}
+.urg-item{display:flex;align-items:center;gap:6px;font-size:11px;color:#6b8fa8}
+.urg-dot{width:6px;height:6px;border-radius:50%;background:#00ff88;box-shadow:0 0 5px #00ff88;animation:blink 1.5s infinite;flex-shrink:0}
+.urg-dot.r{background:#ff4466;box-shadow:0 0 5px #ff4466}
+.urg-val{color:#00b4ff;font-weight:500}
 
-    /* HERO */
-    .hero{padding:3.5rem 1.2rem 2.5rem;text-align:center;position:relative;display:flex;flex-direction:column;align-items:center}
-    .hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:500px;height:250px;background:radial-gradient(ellipse at center,#00b4ff14,transparent 70%);pointer-events:none}
-    .tag{display:inline-flex;align-items:center;gap:7px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#00b4ff;border:1px solid #00b4ff33;background:#00b4ff0a;padding:4px 13px;border-radius:999px;margin-bottom:1.4rem}
-    .tag-dot{width:5px;height:5px;border-radius:50%;background:#00b4ff;box-shadow:0 0 5px #00b4ff;animation:blink 1.5s infinite}
-    .hero h1{font-size:clamp(26px,7vw,48px);font-weight:500;line-height:1.15;color:#fff;margin-bottom:.9rem;max-width:640px}
-    .tw-line{display:block;min-height:1.3em;font-size:clamp(26px,7vw,48px);font-weight:500;color:#00b4ff;text-shadow:0 0 25px #00b4ff28}
-    .cur{display:inline-block;width:2px;height:.85em;background:#00b4ff;margin-left:2px;vertical-align:middle;animation:blink .8s infinite}
-    .hero-sub{font-size:clamp(13px,3vw,15px);color:#3a6080;line-height:1.7;max-width:400px;margin:0 auto 1.8rem}
-    .btns{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-bottom:1.8rem;width:100%}
-    .btn{padding:12px 24px;border-radius:10px;background:#00b4ff;color:#000;font-size:14px;font-weight:500;border:none;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-block;text-align:center}
-    .btn:hover{background:#33c2ff;transform:translateY(-1px)}
-    .btn-o{background:transparent!important;color:#3a6080!important;border:1px solid #0e1a33!important}
-    .btn-o:hover{border-color:#00b4ff44!important;color:#00b4ff!important}
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.2rem;border-bottom:1px solid #0e1a33;background:#02040fee;position:sticky;top:0;z-index:100;backdrop-filter:blur(8px)}
+.logo{font-size:16px;font-weight:500;letter-spacing:.1em;color:#fff}
+.logo span{color:#00b4ff}
+.logo small{font-size:9px;color:#1e3a5a;letter-spacing:.12em;margin-left:4px;text-transform:uppercase}
+.nav-r{display:flex;align-items:center;gap:10px}
+.nav-btn{font-size:12px;padding:7px 14px;border-radius:8px;background:transparent;color:#00b4ff;border:1px solid #00b4ff55;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-block}
+.nav-btn:hover{background:#00b4ff18}
+.lang-btn{background:transparent;border:1px solid #00b4ff44;color:#00b4ff;font-size:12px;padding:5px 12px;border-radius:8px;cursor:pointer}
 
-    /* STATS */
-    .stats{display:grid;grid-template-columns:repeat(2,1fr);border:1px solid #0e1a33;border-radius:12px;overflow:hidden;width:100%;max-width:640px;background:#030712aa}
-    .stat{padding:.9rem;text-align:center;border-right:1px solid #0e1a33;border-bottom:1px solid #0e1a33}
-    .stat:nth-child(2){border-right:none}
-    .stat:nth-child(3){border-bottom:none}
-    .stat:nth-child(4){border-right:none;border-bottom:none}
-    .stat-v{font-size:20px;font-weight:500;color:#00b4ff;line-height:1;margin-bottom:2px;text-shadow:0 0 12px #00b4ff44}
-    .stat-l{font-size:10px;color:#1e3a5a;letter-spacing:.05em;text-transform:uppercase}
+/* HERO */
+.hero{padding:3.5rem 1.2rem 2.5rem;text-align:center;position:relative;display:flex;flex-direction:column;align-items:center}
+.hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:500px;height:250px;background:radial-gradient(ellipse at center,#00b4ff14,transparent 70%);pointer-events:none}
+.tag{display:inline-flex;align-items:center;gap:7px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#00b4ff;border:1px solid #00b4ff33;background:#00b4ff0a;padding:4px 13px;border-radius:999px;margin-bottom:1.4rem}
+.tag-dot{width:5px;height:5px;border-radius:50%;background:#00b4ff;box-shadow:0 0 5px #00b4ff;animation:blink 1.5s infinite}
+.hero h1{font-size:clamp(26px,7vw,48px);font-weight:500;line-height:1.15;color:#fff;margin-bottom:.9rem;max-width:640px}
+.tw-line{display:block;min-height:1.3em;font-size:clamp(26px,7vw,48px);font-weight:500;color:#00b4ff;text-shadow:0 0 25px #00b4ff28}
+.cur{display:inline-block;width:2px;height:.85em;background:#00b4ff;margin-left:2px;vertical-align:middle;animation:blink .8s infinite}
+.hero-sub{font-size:clamp(14px,3vw,16px);color:#8bafc8;line-height:1.7;max-width:420px;margin:0 auto 1.8rem}
+.btns{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-bottom:1.8rem;width:100%}
+.btn{padding:12px 24px;border-radius:10px;background:#00b4ff;color:#000;font-size:14px;font-weight:500;border:none;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-block;text-align:center}
+.btn:hover{background:#33c2ff;transform:translateY(-1px)}
+.btn-o{background:transparent!important;color:#7a9ab8!important;border:1px solid #1a2a3a!important}
+.btn-o:hover{border-color:#00b4ff44!important;color:#00b4ff!important}
 
-    .div{height:1px;background:linear-gradient(90deg,transparent,#00b4ff1a,transparent)}
-    .sec{padding:2.5rem 1.2rem;max-width:900px;margin:0 auto}
-    .eyebrow{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#00b4ff;text-align:center;margin-bottom:.4rem}
-    .sec-t{font-size:clamp(20px,4vw,28px);font-weight:500;color:#fff;text-align:center;margin-bottom:.5rem}
-    .sec-sub{font-size:13px;color:#3a6080;text-align:center;margin-bottom:1.8rem}
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(2,1fr);border:1px solid #0e1a33;border-radius:12px;overflow:hidden;width:100%;max-width:640px;background:#030712aa}
+.stat{padding:.9rem;text-align:center;border-right:1px solid #0e1a33;border-bottom:1px solid #0e1a33}
+.stat:nth-child(2){border-right:none}
+.stat:nth-child(3){border-bottom:none}
+.stat:nth-child(4){border-right:none;border-bottom:none}
+.stat-v{font-size:20px;font-weight:500;color:#00b4ff;line-height:1;margin-bottom:2px;text-shadow:0 0 12px #00b4ff44}
+.stat-l{font-size:10px;color:#4a6a80;letter-spacing:.05em;text-transform:uppercase}
 
-    /* PRODUCT CARDS - SHOPIFY READY */
-    .gal{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-    .gc{border-radius:13px;overflow:hidden;border:1px solid #0e1a33;background:#030712;transition:all .3s;cursor:pointer;position:relative;text-decoration:none;display:block}
-    .gc:hover{border-color:#00b4ff55;transform:translateY(-3px);box-shadow:0 8px 30px #00b4ff0a}
-    .gc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#00b4ff,transparent);opacity:0;transition:opacity .3s}
-    .gc:hover::before{opacity:1}
+.div{height:1px;background:linear-gradient(90deg,transparent,#00b4ff1a,transparent)}
+.sec{padding:2.5rem 1.2rem;max-width:900px;margin:0 auto}
+.eyebrow{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#00b4ff;text-align:center;margin-bottom:.4rem}
+.sec-t{font-size:clamp(20px,4vw,28px);font-weight:500;color:#fff;text-align:center;margin-bottom:.5rem}
+.sec-sub{font-size:13px;color:#8bafc8;text-align:center;margin-bottom:1.8rem;line-height:1.6}
 
-    /* KÉP KONTÉNER - Shopify képeket ide kell berakni */
-    .gt{height:140px;display:flex;align-items:center;justify-content:center;background:#04091a;position:relative;overflow:hidden}
-    .gt img{width:100%;height:100%;object-fit:cover;opacity:.85;transition:opacity .3s}
-    .gc:hover .gt img{opacity:1}
-    /* Ha nincs kép, emoji fallback jelenik meg */
-    .gt-fallback{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-size:36px}
-    .gt-fallback.hidden{display:none}
-    .gt-label{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#00b4ff;opacity:.8;position:absolute;bottom:6px;left:8px;z-index:2;background:#02040f99;padding:2px 6px;border-radius:4px}
+/* PROBLEM CARDS */
+.gal{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.gc{border-radius:13px;overflow:hidden;border:1px solid #0e1a33;background:#030712;transition:all .3s;cursor:pointer;position:relative;text-decoration:none;display:block}
+.gc:hover{border-color:#00b4ff55;transform:translateY(-3px);box-shadow:0 8px 30px #00b4ff08}
+.gc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#00b4ff,transparent);opacity:0;transition:opacity .3s}
+.gc:hover::before{opacity:1}
+.gt{height:110px;display:flex;align-items:center;justify-content:center;background:#04091a;position:relative;overflow:hidden}
+.gt img{width:100%;height:100%;object-fit:cover;opacity:.8;position:absolute;inset:0}
+.gt-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:36px}
+.gt-label{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#00b4ff;position:absolute;bottom:5px;left:7px;z-index:2;background:#02040fcc;padding:2px 6px;border-radius:4px}
+.gi{padding:.8rem .9rem 1rem}
+.gn{font-size:12px;font-weight:500;color:#fff;margin-bottom:.3rem;line-height:1.3}
+.gd{font-size:11px;color:#8bafc8;line-height:1.5;margin-bottom:.5rem}
+.gp{font-size:11px;color:#00b4ff}
+.gb{font-size:9px;padding:2px 6px;border-radius:999px;background:#00b4ff11;color:#00b4ff;border:1px solid #00b4ff33;float:right;margin-top:1px}
+.badge-r{background:#ff446611;color:#ff4466;border-color:#ff446633}
+.badge-g{background:#00ff8811;color:#00ff88;border-color:#00ff8833}
 
-    .gi{padding:.8rem 1rem 1rem}
-    .gn{font-size:13px;font-weight:500;color:#fff;margin-bottom:.3rem;line-height:1.3}
-    .gd{font-size:11px;color:#3a6080;line-height:1.5;margin-bottom:.6rem}
-    .gp{font-size:12px;color:#00b4ff}
-    .gb{font-size:9px;padding:2px 6px;border-radius:999px;background:#00b4ff11;color:#00b4ff;border:1px solid #00b4ff33;float:right;margin-top:1px}
-    .badge-r{background:#ff446611;color:#ff4466;border-color:#ff446633}
-    .badge-g{background:#00ff8811;color:#00ff88;border-color:#00ff8833}
+/* MAKERWORLD */
+.mw-bg{background:#030712;padding:2.5rem 1.2rem}
+.mw-inner{max-width:900px;margin:0 auto}
+.mw-box{background:#04091a;border:1px solid #00b4ff22;border-radius:16px;overflow:hidden}
+.mw-top{padding:1.5rem;display:flex;flex-direction:column;gap:1rem;align-items:flex-start}
+.mw-badge{display:inline-flex;align-items:center;gap:6px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#00b4ff;border:1px solid #00b4ff33;background:#00b4ff0a;padding:3px 10px;border-radius:999px}
+.mw-title{font-size:clamp(18px,4vw,24px);font-weight:500;color:#fff;line-height:1.3;max-width:500px}
+.mw-desc{font-size:13px;color:#8bafc8;line-height:1.6;max-width:500px}
+.mw-steps{display:flex;flex-direction:column;gap:8px;margin-top:.5rem}
+.mw-step{display:flex;align-items:flex-start;gap:10px;font-size:12px;color:#8bafc8}
+.mw-step-num{width:20px;height:20px;border-radius:50%;background:#00b4ff18;border:1px solid #00b4ff33;display:flex;align-items:center;justify-content:center;font-size:10px;color:#00b4ff;flex-shrink:0;margin-top:1px}
+.mw-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:10px;background:#00b4ff;color:#000;font-size:14px;font-weight:500;text-decoration:none;transition:all .2s;border:none;cursor:pointer}
+.mw-btn:hover{background:#33c2ff;transform:translateY(-1px)}
+.mw-preview{border-top:1px solid #0e1a33;padding:1rem;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mw-card{border-radius:8px;overflow:hidden;border:1px solid #0e1a33;background:#030712;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:28px;color:#1e3a5a;position:relative}
+.mw-card-label{position:absolute;bottom:4px;left:4px;right:4px;font-size:9px;color:#4a6a80;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-    /* BEFORE/AFTER */
-    .ba-outer{max-width:900px;margin:0 auto;padding:0 1.2rem 2.5rem}
-    .ba-wrap{position:relative;border-radius:13px;overflow:hidden;border:1px solid #0e1a33;cursor:col-resize;user-select:none;height:200px}
-    .ba-side{position:absolute;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:100%}
-    .ba-after{background:#020d1a}
-    .ba-before-clip{position:absolute;top:0;bottom:0;left:0;overflow:hidden;background:#0a1a0a}
-    .ba-before-inner{position:absolute;top:0;bottom:0;left:0;right:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+/* MATERIALS */
+.mat-bg{background:#02040f;padding:2.5rem 1.2rem}
+.mat-inner{max-width:900px;margin:0 auto}
+.mat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:1.8rem}
+.mat-card{background:#04091a;border:1px solid #0e1a33;border-radius:12px;padding:1rem;transition:border-color .3s}
+.mat-card:hover{border-color:#00b4ff33}
+.mat-icon{font-size:20px;margin-bottom:.5rem}
+.mat-name{font-size:13px;font-weight:500;color:#fff;margin-bottom:.25rem}
+.mat-use{font-size:11px;color:#00b4ff;margin-bottom:.25rem}
+.mat-desc{font-size:11px;color:#8bafc8;line-height:1.5}
 
-    /* BA képek - Shopify képeket ide */
-    .ba-img{width:100%;height:100%;object-fit:cover;opacity:.7;position:absolute;inset:0}
-    .ba-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+/* BA */
+.ba-outer{max-width:900px;margin:0 auto;padding:0 1.2rem 2.5rem}
+.ba-wrap{position:relative;border-radius:13px;overflow:hidden;border:1px solid #0e1a33;cursor:col-resize;user-select:none;height:190px}
+.ba-side{position:absolute;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:100%}
+.ba-after{background:#020d1a}
+.ba-before-clip{position:absolute;top:0;bottom:0;left:0;overflow:hidden;background:#071207}
+.ba-before-inner{position:absolute;top:0;bottom:0;left:0;right:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.ba-icon{font-size:40px;line-height:1}
+.ba-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;background:#02040faa;padding:2px 8px;border-radius:4px}
+.ba-before-inner .ba-label{color:#4a7a4a}
+.ba-after .ba-label{color:#00b4ff}
+.ba-desc{font-size:11px;color:#8bafc8;text-align:center;padding:3px 12px;background:#02040faa;border-radius:4px}
+.ba-handle{position:absolute;top:0;bottom:0;width:3px;background:#00b4ff;z-index:5;transform:translateX(-50%)}
+.ba-handle::after{content:'◀▶';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:30px;height:30px;background:#00b4ff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#000;line-height:30px;text-align:center}
+.ba-hint{font-size:11px;color:#2a4a5a;text-align:center;margin-top:.4rem}
 
-    .ba-icon{font-size:44px;line-height:1}
-    .ba-label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;background:#02040faa;padding:2px 8px;border-radius:4px}
-    .ba-before-inner .ba-label{color:#3a6080}
-    .ba-after .ba-label{color:#00b4ff}
-    .ba-desc{font-size:11px;color:#c8d8f0;text-align:center;padding:0 1rem;background:#02040faa;border-radius:4px;padding:3px 8px}
-    .ba-handle{position:absolute;top:0;bottom:0;width:3px;background:#00b4ff;z-index:5;transform:translateX(-50%)}
-    .ba-handle::after{content:'◀▶';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:32px;height:32px;background:#00b4ff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#000;line-height:32px;text-align:center}
-    .ba-hint{font-size:11px;color:#1e3a5a;text-align:center;margin-top:.4rem}
+/* SLOT */
+.slot-s{padding:.5rem 1.2rem 1.8rem}
+.slot-b{max-width:900px;margin:0 auto;background:#04091a;border:1px solid #ff446633;border-radius:13px;padding:1.1rem 1.2rem;display:flex;flex-direction:column;gap:.8rem}
+.slot-l{display:flex;align-items:center;gap:9px}
+.slot-d{width:8px;height:8px;border-radius:50%;background:#ff4466;box-shadow:0 0 8px #ff4466;animation:blink 1s infinite;flex-shrink:0}
+.slot-t{font-size:13px;color:#c8d8f0;line-height:1.4}
+.slot-t strong{color:#ff4466}
+.bar-bg{height:4px;background:#0e1a33;border-radius:999px;overflow:hidden}
+.bar-f{height:100%;width:75%;background:#ff4466;border-radius:999px;box-shadow:0 0 6px #ff4466}
+.bar-s{font-size:10px;color:#6b8fa8;margin-top:3px}
 
-    /* SLOT */
-    .slot-s{padding:.5rem 1.2rem 1.8rem}
-    .slot-b{max-width:900px;margin:0 auto;background:#04091a;border:1px solid #ff446633;border-radius:13px;padding:1.1rem 1.2rem;display:flex;flex-direction:column;gap:.8rem}
-    .slot-l{display:flex;align-items:center;gap:9px}
-    .slot-d{width:8px;height:8px;border-radius:50%;background:#ff4466;box-shadow:0 0 8px #ff4466;animation:blink 1s infinite;flex-shrink:0}
-    .slot-t{font-size:13px;color:#c8d8f0;line-height:1.4}
-    .slot-t strong{color:#ff4466}
-    .bar-bg{height:4px;background:#0e1a33;border-radius:999px;overflow:hidden}
-    .bar-f{height:100%;width:75%;background:#ff4466;border-radius:999px;box-shadow:0 0 6px #ff4466}
-    .bar-s{font-size:10px;color:#3a6080;margin-top:3px}
+/* REVIEWS */
+.rev-s{padding:2.5rem 1.2rem;background:#030712}
+.rev-i{max-width:900px;margin:0 auto}
+.rev-g{display:grid;grid-template-columns:1fr;gap:9px;margin-top:1.8rem}
+.rc{background:#04091a;border:1px solid #0e1a33;border-radius:12px;padding:1.1rem;transition:border-color .3s}
+.rc:hover{border-color:#00b4ff33}
+.rt{display:flex;align-items:center;gap:9px;margin-bottom:.7rem}
+.rav{width:34px;height:34px;border-radius:50%;background:#00b4ff18;border:1px solid #00b4ff33;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#00b4ff;flex-shrink:0}
+.rn{font-size:13px;font-weight:500;color:#c8d8f0}
+.rl{font-size:11px;color:#4a6a80}
+.rs{color:#00b4ff;font-size:12px;margin-bottom:.4rem}
+.rtx{font-size:13px;color:#8bafc8;line-height:1.6}
+.rbg{display:inline-block;font-size:9px;padding:2px 7px;border-radius:999px;background:#00ff8811;color:#00ff88;border:1px solid #00ff8833;margin-top:.7rem}
 
-    /* REVIEWS */
-    .rev-s{padding:2.5rem 1.2rem;background:#030712}
-    .rev-i{max-width:900px;margin:0 auto}
-    .rev-g{display:grid;grid-template-columns:1fr;gap:9px;margin-top:1.8rem}
-    .rc{background:#04091a;border:1px solid #0e1a33;border-radius:12px;padding:1.1rem;transition:border-color .3s}
-    .rc:hover{border-color:#00b4ff33}
-    .rt{display:flex;align-items:center;gap:9px;margin-bottom:.7rem}
-    .rav{width:34px;height:34px;border-radius:50%;background:#00b4ff18;border:1px solid #00b4ff33;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#00b4ff;flex-shrink:0}
-    .rn{font-size:13px;font-weight:500;color:#c8d8f0}
-    .rl{font-size:11px;color:#1e3a5a}
-    .rs{color:#00b4ff;font-size:12px;margin-bottom:.4rem}
-    .rtx{font-size:13px;color:#3a6080;line-height:1.6}
-    .rbg{display:inline-block;font-size:9px;padding:2px 7px;border-radius:999px;background:#00ff8811;color:#00ff88;border:1px solid #00ff8833;margin-top:.7rem}
+/* WHY */
+.why-g{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.wc{background:#030712;border:1px solid #0e1a33;border-radius:12px;padding:1.1rem;transition:all .3s;position:relative;overflow:hidden}
+.wc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#00b4ff,transparent);opacity:0;transition:opacity .3s}
+.wc:hover::before{opacity:1}
+.wc:hover{border-color:#00b4ff33}
+.wi{font-size:19px;margin-bottom:.7rem}
+.wc h3{font-size:12px;font-weight:500;color:#c8d8f0;margin-bottom:.25rem}
+.wc p{font-size:11px;color:#8bafc8;line-height:1.5}
 
-    /* WHY */
-    .why-g{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
-    .wc{background:#030712;border:1px solid #0e1a33;border-radius:12px;padding:1.1rem;transition:all .3s;position:relative;overflow:hidden}
-    .wc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#00b4ff,transparent);opacity:0;transition:opacity .3s}
-    .wc:hover::before{opacity:1}
-    .wc:hover{border-color:#00b4ff33}
-    .wi{font-size:19px;margin-bottom:.7rem}
-    .wc h3{font-size:12px;font-weight:500;color:#c8d8f0;margin-bottom:.25rem}
-    .wc p{font-size:11px;color:#1e3a5a;line-height:1.5}
+/* PRICE */
+.price-bg{background:#030712;padding:2.5rem 1.2rem}
+.pb{max-width:860px;margin:0 auto;background:#04091a;border:1px solid #00b4ff33;border-radius:15px;padding:1.8rem 1.4rem;text-align:center}
+.pt{font-size:10px;color:#00b4ff;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem}
+.pbig{font-size:15px;font-weight:500;color:#fff;margin-bottom:.3rem}
+.pbig span{color:#00b4ff;font-size:32px;text-shadow:0 0 16px #00b4ff55}
+.psub{font-size:13px;color:#8bafc8;margin-bottom:1.3rem}
+.pfs{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.3rem}
+.pf{display:flex;align-items:center;gap:6px;font-size:12px;color:#8bafc8}
+.pd{width:4px;height:4px;border-radius:50%;background:#00b4ff;flex-shrink:0}
 
-    /* PRICE */
-    .price-bg{background:#030712;padding:2.5rem 1.2rem}
-    .pb{max-width:860px;margin:0 auto;background:#04091a;border:1px solid #00b4ff33;border-radius:15px;padding:1.8rem 1.4rem;text-align:center}
-    .pt{font-size:10px;color:#00b4ff;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem}
-    .pbig{font-size:15px;font-weight:500;color:#fff;margin-bottom:.3rem}
-    .pbig span{color:#00b4ff;font-size:32px;text-shadow:0 0 16px #00b4ff55}
-    .psub{font-size:12px;color:#1e3a5a;margin-bottom:1.3rem}
-    .pfs{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.3rem}
-    .pf{display:flex;align-items:center;gap:6px;font-size:11px;color:#3a6080}
-    .pd{width:4px;height:4px;border-radius:50%;background:#00b4ff;flex-shrink:0}
+/* STEPS */
+.steps-g{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem;margin-top:1.8rem}
+.si{text-align:center;padding:0 .4rem}
+.sc{width:38px;height:38px;border-radius:50%;background:#030712;border:1px solid #00b4ff55;display:flex;align-items:center;justify-content:center;margin:0 auto .9rem;font-size:12px;font-weight:500;color:#00b4ff;box-shadow:0 0 10px #00b4ff14}
+.si h4{font-size:12px;font-weight:500;color:#c8d8f0;margin-bottom:.25rem}
+.si p{font-size:11px;color:#8bafc8;line-height:1.5}
 
-    /* STEPS */
-    .steps-g{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem;margin-top:1.8rem}
-    .si{text-align:center;padding:0 .4rem}
-    .sc{width:38px;height:38px;border-radius:50%;background:#030712;border:1px solid #00b4ff55;display:flex;align-items:center;justify-content:center;margin:0 auto .9rem;font-size:12px;font-weight:500;color:#00b4ff;box-shadow:0 0 10px #00b4ff14}
-    .si h4{font-size:12px;font-weight:500;color:#c8d8f0;margin-bottom:.25rem}
-    .si p{font-size:11px;color:#1e3a5a;line-height:1.5}
+/* FAQ */
+.faq-bg{background:#030712;padding:2.5rem 1.2rem}
+.faq-inner{max-width:900px;margin:0 auto}
+.faq-list{display:flex;flex-direction:column;gap:8px;margin-top:1.8rem}
+.faq-item{border:1px solid #0e1a33;border-radius:11px;overflow:hidden;background:#04091a}
+.faq-q{width:100%;background:transparent;border:none;color:#c8d8f0;font-size:13px;font-weight:500;padding:1rem 1.1rem;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:.5rem;font-family:inherit}
+.faq-q:hover{background:#050d1a}
+.faq-arr{color:#00b4ff;font-size:16px;transition:transform .3s;flex-shrink:0}
+.faq-a{font-size:13px;color:#8bafc8;line-height:1.6;padding:0 1.1rem;max-height:0;overflow:hidden;transition:max-height .3s,padding .3s}
+.faq-item.open .faq-a{max-height:200px;padding:.2rem 1.1rem 1rem}
+.faq-item.open .faq-arr{transform:rotate(180deg)}
 
-    /* CTA */
-    .cta-s{padding:3.5rem 1.2rem;text-align:center}
-    .cta-i{max-width:480px;margin:0 auto}
-    .cta-i h2{font-size:clamp(20px,5vw,30px);font-weight:500;color:#fff;margin-bottom:.7rem;line-height:1.2}
-    .cta-i p{font-size:14px;color:#3a6080;margin-bottom:1.6rem;line-height:1.7}
+/* CTA */
+.cta-s{padding:3.5rem 1.2rem;text-align:center}
+.cta-i{max-width:480px;margin:0 auto}
+.cta-i h2{font-size:clamp(20px,5vw,30px);font-weight:500;color:#fff;margin-bottom:.7rem;line-height:1.2}
+.cta-i p{font-size:14px;color:#8bafc8;margin-bottom:1.6rem;line-height:1.7}
 
-    /* WHATSAPP */
-    .wa{position:fixed;bottom:80px;right:16px;z-index:300;width:52px;height:52px;border-radius:50%;background:#25d366;border:2px solid #1ab854;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 4px 20px #25d36644;transition:transform .2s;text-decoration:none}
-    .wa:hover{transform:scale(1.1)}
-    .wa-tip{position:absolute;right:60px;top:50%;transform:translateY(-50%);background:#04091a;border:1px solid #0e1a33;color:#c8d8f0;font-size:12px;padding:6px 12px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s}
-    .wa:hover .wa-tip{opacity:1}
+/* WA */
+.wa{position:fixed;bottom:80px;right:16px;z-index:300;width:52px;height:52px;border-radius:50%;background:#25d366;border:2px solid #1ab854;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 4px 20px #25d36644;transition:transform .2s;text-decoration:none}
+.wa:hover{transform:scale(1.1)}
+.wa-tip{position:absolute;right:60px;top:50%;transform:translateY(-50%);background:#04091a;border:1px solid #0e1a33;color:#c8d8f0;font-size:12px;padding:6px 12px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s}
+.wa:hover .wa-tip{opacity:1}
 
-    /* MOBILE STICKY CTA */
-    .mob-cta{display:none;position:fixed;bottom:0;left:0;right:0;background:#02040fee;border-top:1px solid #0e1a33;padding:10px 1.2rem;gap:9px;z-index:200;backdrop-filter:blur(8px)}
+.mob-cta{display:none;position:fixed;bottom:0;left:0;right:0;background:#02040fee;border-top:1px solid #0e1a33;padding:10px 1.2rem;gap:9px;z-index:200;backdrop-filter:blur(8px)}
 
-    footer{padding:1.2rem;border-top:1px solid #0a1020;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
-    .fl{font-size:12px;color:#1e3a5a;letter-spacing:.08em}
-    .fl span{color:#00b4ff}
-    .fc{font-size:11px;color:#0e1a33}
+footer{padding:1.2rem;border-top:1px solid #0a1020;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+.fl{font-size:12px;color:#2a4a5a;letter-spacing:.08em}
+.fl span{color:#00b4ff}
+.fc{font-size:11px;color:#1a2a3a}
 
-    /* RESPONSIVE */
-    @media(min-width:601px){
-      .stats{grid-template-columns:repeat(4,1fr)}
-      .stat{border-bottom:none}
-      .stat:nth-child(2){border-right:1px solid #0e1a33}
-      .stat:last-child{border-right:none}
-      .gal{grid-template-columns:repeat(3,1fr)}
-      .gt{height:160px}
-      .rev-g{grid-template-columns:repeat(3,1fr)}
-      .why-g{grid-template-columns:repeat(4,1fr)}
-      .steps-g{grid-template-columns:repeat(4,1fr)}
-      .slot-b{flex-direction:row;align-items:center}
-      .wa{bottom:24px}
-      footer{padding:1.2rem 2rem}
-    }
-    @media(max-width:600px){
-      .urg-item:last-child{display:none}
-      .mob-cta{display:flex}
-      footer{padding-bottom:5.5rem}
-      .btns{flex-direction:column;align-items:stretch}
-      .btn{max-width:100%;text-align:center}
-    }
-  </style>
-</head>
-<body>
+@media(min-width:601px){
+  .stats{grid-template-columns:repeat(4,1fr)}
+  .stat{border-bottom:none}
+  .stat:nth-child(2){border-right:1px solid #0e1a33}
+  .stat:last-child{border-right:none}
+  .gal{grid-template-columns:repeat(3,1fr)}
+  .gt{height:130px}
+  .rev-g{grid-template-columns:repeat(3,1fr)}
+  .why-g{grid-template-columns:repeat(4,1fr)}
+  .steps-g{grid-template-columns:repeat(4,1fr)}
+  .slot-b{flex-direction:row;align-items:center}
+  .mat-grid{grid-template-columns:repeat(3,1fr)}
+  .mw-top{flex-direction:row;align-items:flex-start;justify-content:space-between}
+  .mw-preview{grid-template-columns:repeat(6,1fr)}
+  .wa{bottom:24px}
+  footer{padding:1.2rem 2rem}
+}
+@media(max-width:600px){
+  .urg-item:last-child{display:none}
+  .mob-cta{display:flex}
+  footer{padding-bottom:5.5rem}
+  .btns{flex-direction:column;align-items:stretch}
+  .btn{max-width:100%;text-align:center}
+}
+</style>
+
 <canvas id="pcv"></canvas>
 <div class="wrap">
 
-  <div class="urg-bar">
-    <div class="urg-item"><span class="urg-dot"></span><span id="t-aktiv">Aktív:</span> <span class="urg-val" id="ao">3</span> <span id="t-rendeles">rendelés</span></div>
-    <div class="urg-item"><span class="urg-dot r"></span><span id="t-slot">Szabad slot:</span> <span class="urg-val">2</span> / 8</div>
-    <div class="urg-item"><span class="urg-dot"></span><span id="t-valasz">Válasz: ~4 óra</span></div>
-  </div>
-
-  <nav>
-    <div class="logo">PRINT<span>3D</span><small>lab</small></div>
-    <div class="nav-r">
-      <button class="lang-btn" id="lang-btn">🌐 EN</button>
-      <!-- SHOPIFY: cseréld le a href-et -->
-      <a class="nav-btn" href="https://YOUR-SHOP.myshopify.com" id="t-nav-btn">Rendelés →</a>
-    </div>
-  </nav>
-
-  <section class="hero">
-    <div class="tag"><span class="tag-dot"></span><span id="t-tag">Helyi gyártás · Gyors átfutás</span></div>
-    <h1><span id="t-h1">3D nyomtatás —</span><br><span class="tw-line"><span id="tw"></span><span class="cur"></span></span></h1>
-    <p class="hero-sub" id="t-sub">Egyedi termékek, alkatrészek, designdarabok. Kézzel, filamentről — neked, a régióban.</p>
-    <div class="btns">
-      <a class="btn" href="https://YOUR-SHOP.myshopify.com/collections/all" id="t-btn1">Egyedi rendelés →</a>
-      <a class="btn btn-o" href="https://YOUR-SHOP.myshopify.com/collections/all" id="t-btn2">Termékek böngészése</a>
-    </div>
-    <div class="stats">
-      <div class="stat"><div class="stat-v" id="c1">0h</div><div class="stat-l" id="t-s1">Átlag átfutás</div></div>
-      <div class="stat"><div class="stat-v" id="c2">0%</div><div class="stat-l" id="t-s2">Egyedi gyártás</div></div>
-      <div class="stat"><div class="stat-v" id="c3">0%</div><div class="stat-l" id="t-s3">Versenytárshoz képest</div></div>
-      <div class="stat"><div class="stat-v">📹</div><div class="stat-l" id="t-s4">Videó rendeléshez</div></div>
-    </div>
-  </section>
-
-  <div class="div"></div>
-
-  <!-- ================================================
-       TERMÉK KÁRTYÁK - SHOPIFY KÉPEK IDE KERÜLNEK
-       Minden .gt div-ben lévő <img> src-jét cseréld le
-       a Shopify-ból kimásolt kép URL-re.
-       Ha nincs kép, az emoji automatikusan látszik.
-       ================================================ -->
-  <section class="sec">
-    <div class="eyebrow" id="t-gal-ey">Miben segítünk</div>
-    <div class="sec-t" id="t-gal-t">Valós problémák — kinyomtatva</div>
-    <div class="sec-sub" id="t-gal-sub">Ha valami nem kapható, nem passzol, vagy csak a tiéd kell legyen</div>
-    <div class="gal">
-
-      <!-- KÁRTYA 1 -->
-      <a class="gc" href="https://YOUR-SHOP.myshopify.com/products/alkatresz">
-        <div class="gt">
-          <!-- KÉP: src-t cseréld le Shopify kép URL-re -->
-          <img src="" alt="Törött alkatrész" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')">
-          <div class="gt-fallback">🔧</div>
-          <div class="gt-label" id="tgl1">Alkatrész</div>
-        </div>
-        <div class="gi">
-          <div class="gn" id="tg1">Törött alkatrész — újra működik</div>
-          <div class="gd" id="tgd1">Már nem gyártják? Mindegy. Fényképet küldöd, mi kinyomtatjuk — pontosan passzol.</div>
-          <div class="gp">2 000 Ft-tól<span class="gb badge-r" id="tgb1">csak itt</span></div>
-        </div>
-      </a>
-
-      <!-- KÁRTYA 2 -->
-      <a class="gc" href="https://YOUR-SHOP.myshopify.com/products/meretre">
-        <div class="gt">
-          <img src="" alt="Méretre gyártás" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')">
-          <div class="gt-fallback">📐</div>
-          <div class="gt-label" id="tgl2">Méretre</div>
-        </div>
-        <div class="gi">
-          <div class="gn" id="tg2">Boltban nincs meg a méret?</div>
-          <div class="gd" id="tgd2">Polctartó, rögzítő, adapter — ha sehol nem kapod meg, mi pontosan legyártjuk.</div>
-          <div class="gp">1 500 Ft-tól<span class="gb" id="tgb2">rendelésre</span></div>
-        </div>
-      </a>
-
-      <!-- KÁRTYA 3 -->
-      <a class="gc" href="https://YOUR-SHOP.myshopify.com/products/gyors">
-        <div class="gt">
-          <img src="" alt="Gyors nyomtatás" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')">
-          <div class="gt-fallback">⚡</div>
-          <div class="gt-label" id="tgl3">Gyors</div>
-        </div>
-        <div class="gi">
-          <div class="gn" id="tg3">Holnapra kell — megcsináljuk</div>
-          <div class="gd" id="tgd3">24-48 óra alatt kész, személyesen átveheted. Nincs hetekig tartó várakozás.</div>
-          <div class="gp" id="tgp3">Árajánlat 24h-n belül<span class="gb badge-g" id="tgb3">gyors</span></div>
-        </div>
-      </a>
-
-      <!-- KÁRTYA 4 -->
-      <a class="gc" href="https://YOUR-SHOP.myshopify.com/products/egyedi">
-        <div class="gt">
-          <img src="" alt="Egyedi névvel" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')">
-          <div class="gt-fallback">🏷️</div>
-          <div class="gt-label" id="tgl4">Egyedi</div>
-        </div>
-        <div class="gi">
-          <div class="gn" id="tg4">Névvel, logóval — csak a tiéd</div>
-          <div class="gd" id="tgd4">Neved, céged logója, egyedi felirat — olyat kapsz amit máshol nem tudsz megvenni.</div>
-          <div class="gp">2 500 Ft-tól<span class="gb" id="tgb4">egyedi</span></div>
-        </div>
-      </a>
-
-      <!-- KÁRTYA 5 -->
-      <a class="gc" href="https://YOUR-SHOP.myshopify.com/products/specialis">
-        <div class="gt">
-          <img src="" alt="Speciális igény" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')">
-          <div class="gt-fallback">🧩</div>
-          <div class="gt-label" id="tgl5">Speciális</div>
-        </div>
-        <div class="gi">
-          <div class="gn" id="tg5">Ha semmi nem passzol — mi megoldjuk</div>
-          <div class="gd" id="tgd5">Furcsa méret, régi gép, különleges igény — amit máshol visszautasítanak, mi megcsináljuk.</div>
-          <div class="gp" id="tgp5">Egyedi ajánlat<span class="gb badge-r" id="tgb5">kihívás</span></div>
-        </div>
-      </a>
-
-      <!-- KÁRTYA 6 -->
-      <a class="gc" href="https://YOUR-SHOP.myshopify.com/products/ajandek">
-        <div class="gt">
-          <img src="" alt="Egyedi ajándék" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')">
-          <div class="gt-fallback">🎁</div>
-          <div class="gt-label" id="tgl6">Ajándék</div>
-        </div>
-        <div class="gi">
-          <div class="gn" id="tg6">Egyedi ajándék amit sehol nem veszel meg</div>
-          <div class="gd" id="tgd6">Személyre szabva, kézzel nyomtatva — olyan ajándék ami tényleg meglep, videóval együtt.</div>
-          <div class="gp">2 900 Ft-tól<span class="gb badge-g" id="tgb6">népszerű</span></div>
-        </div>
-      </a>
-
-    </div>
-  </section>
-
-  <!-- ================================================
-       ELŐTTE / UTÁNA CSÚSZKA
-       ba-before-img és ba-after-img src-jét cseréld le
-       saját fotókra (Shopify Files vagy CDN URL)
-       ================================================ -->
-  <div class="ba-outer">
-    <div class="eyebrow" id="t-ba-ey">Előtte / Utána</div>
-    <div class="sec-t" id="t-ba-t" style="margin-bottom:1rem">Filamentből — kész termék</div>
-    <div class="ba-wrap" id="ba">
-      <!-- UTÁNA oldal -->
-      <div class="ba-side ba-after">
-        <!-- KÉP: src-t cseréld le saját "utána" fotóra -->
-        <img class="ba-img" id="ba-after-img" src="" alt="Utána" onerror="this.style.display='none'">
-        <div class="ba-overlay">
-          <div class="ba-icon">🗿</div>
-          <div class="ba-label" id="t-after">UTÁNA</div>
-          <div class="ba-desc" id="t-after-desc">Kész 3D nyomtatott termék — 48 óra alatt</div>
-        </div>
-      </div>
-      <!-- ELŐTTE oldal -->
-      <div class="ba-before-clip" id="ba-clip" style="width:50%">
-        <div class="ba-before-inner">
-          <!-- KÉP: src-t cseréld le saját "előtte" fotóra -->
-          <img class="ba-img" id="ba-before-img" src="" alt="Előtte" onerror="this.style.display='none'">
-          <div class="ba-overlay">
-            <div class="ba-icon">🧵</div>
-            <div class="ba-label" id="t-before">ELŐTTE</div>
-            <div class="ba-desc" id="t-before-desc">Nyers filament tekercs — csak az alapanyag</div>
-          </div>
-        </div>
-      </div>
-      <div class="ba-handle" id="ba-handle" style="left:50%"></div>
-    </div>
-    <div class="ba-hint" id="t-ba-hint">← Húzd jobbra-balra →</div>
-  </div>
-
-  <section class="slot-s">
-    <div class="slot-b">
-      <div class="slot-l"><span class="slot-d"></span><div class="slot-t" id="t-slot-txt">Ezen a héten csak <strong>2 szabad slot</strong> maradt!</div></div>
-      <div><div class="bar-bg"><div class="bar-f"></div></div><div class="bar-s" id="t-bar-s">6 / 8 slot foglalt</div></div>
-      <a class="btn" href="https://YOUR-SHOP.myshopify.com" id="t-slot-btn">Foglalom →</a>
-    </div>
-  </section>
-
-  <div class="div"></div>
-
-  <section class="rev-s">
-    <div class="rev-i">
-      <div class="eyebrow" id="t-rev-ey">Vélemények</div>
-      <div class="sec-t" id="t-rev-t">Mit mondanak a vevők</div>
-      <div class="rev-g">
-        <div class="rc"><div class="rt"><div class="rav">KM</div><div><div class="rn">Kovács Márton</div><div class="rl">Miskolc</div></div></div><div class="rs">★★★★★</div><div class="rtx" id="tr1">"Törött alkatrészt nyomtattak, pontosan passzolt. Másnap már nálam volt — olcsóbb mint bárhol."</div><div class="rbg" id="trb1">✓ Visszatérő vevő</div></div>
-        <div class="rc"><div class="rt"><div class="rav">SV</div><div><div class="rn">Szabó Vivien</div><div class="rl">Eger</div></div></div><div class="rs">★★★★★</div><div class="rtx" id="tr2">"A videót amit küldtek teljesen lenyűgözött. Ajándékba rendeltem, a barátom imádta!"</div><div class="rbg" id="trb2">✓ Ellenőrzött vásárlás</div></div>
-        <div class="rc"><div class="rt"><div class="rav">TZ</div><div><div class="rn">Tóth Zoltán</div><div class="rl">Miskolc</div></div></div><div class="rs">★★★★★</div><div class="rtx" id="tr3">"Prototípust kértem. Gyors, precíz, az ár meg sem közelítette amit máshol kértek."</div><div class="rbg" id="trb3">✓ Üzleti megrendelő</div></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="sec">
-    <div class="eyebrow" id="t-why-ey">Miért mi?</div>
-    <div class="sec-t" id="t-why-t">Technológia, ami megbízható</div>
-    <div class="why-g">
-      <div class="wc"><div class="wi">💰</div><h3 id="tw1">Jobb ár</h3><p id="twp1">Helyi gyártás, alacsony rezsi. Rejtett díjak nélkül.</p></div>
-      <div class="wc"><div class="wi">📹</div><h3 id="tw2h">Videó</h3><p id="twp2">Minden rendelésről felvételt kapsz.</p></div>
-      <div class="wc"><div class="wi">📍</div><h3 id="tw3h">Helyi</h3><p id="twp3">Személyes átvétel is van.</p></div>
-      <div class="wc"><div class="wi">⚙️</div><h3 id="tw4h">Egyedi</h3><p id="twp4">Saját fájl vagy ötlet — mind a tiéd.</p></div>
-    </div>
-  </section>
-
-  <div class="price-bg">
-    <div class="pb">
-      <div class="pt" id="t-pr-ey">⚡ Garanciánk</div>
-      <div class="pbig" id="t-pr-big">Átlagosan <span>30%</span>-kal olcsóbb</div>
-      <div class="psub" id="t-pr-sub">mint az online szolgáltatók — felesleges marzsok nélkül</div>
-      <div class="pfs">
-        <div class="pf"><span class="pd"></span><span id="tpf1">Ingyenes árajánlat</span></div>
-        <div class="pf"><span class="pd"></span><span id="tpf2">Nincs rejtett díj</span></div>
-        <div class="pf"><span class="pd"></span><span id="tpf3">Garanciális csere</span></div>
-      </div>
-      <a class="btn" href="https://YOUR-SHOP.myshopify.com" id="t-pr-btn">Ingyenes árajánlat →</a>
-    </div>
-  </div>
-
-  <section class="sec">
-    <div class="eyebrow" id="t-st-ey">A folyamat</div>
-    <div class="sec-t" id="t-st-t">4 lépés, és kész</div>
-    <div class="steps-g">
-      <div class="si"><div class="sc">01</div><h4 id="ts1">Írj nekünk</h4><p id="tsp1">Elképzelés vagy fájl — bármi elég.</p></div>
-      <div class="si"><div class="sc">02</div><h4 id="ts2">Árajánlat 24h</h4><p id="tsp2">Pontos ár és átfutási idő.</p></div>
-      <div class="si"><div class="sc">03</div><h4 id="ts3">Nyomtatás</h4><p id="tsp3">Videót kapsz a folyamatról.</p></div>
-      <div class="si"><div class="sc">04</div><h4 id="ts4">Szállítás</h4><p id="tsp4">MPL, GLS, vagy személyesen.</p></div>
-    </div>
-  </section>
-
-  <div class="div"></div>
-
-  <section class="cta-s">
-    <div class="cta-i">
-      <div class="eyebrow" id="t-cta-ey">Kezdjük el</div>
-      <h2 id="t-cta-h">Az ötleted már félúton van</h2>
-      <p id="t-cta-p">Írj egy üzenetet — 24 órán belül visszajelzünk.</p>
-      <div class="btns">
-        <a class="btn" href="https://YOUR-SHOP.myshopify.com" id="t-cta-btn1">Rendelés indítása →</a>
-        <!-- EMAIL: cseréld le -->
-        <a class="btn btn-o" href="mailto:hello@print3dlab.hu" id="t-cta-btn2">Kérdésem van</a>
-      </div>
-    </div>
-  </section>
-
-  <footer>
-    <div class="fl">PRINT<span>3D</span>lab</div>
-    <div class="fc" id="t-footer">© 2026 · Helyi gyártás, valódi minőség</div>
-  </footer>
+<div class="urg-bar">
+  <div class="urg-item"><span class="urg-dot"></span><span id="t-aktiv">Aktív:</span> <span class="urg-val" id="ao">3</span> <span id="t-rendeles">rendelés folyamatban</span></div>
+  <div class="urg-item"><span class="urg-dot r"></span><span id="t-slot">Szabad slot:</span> <span class="urg-val">2 / 8</span></div>
+  <div class="urg-item"><span class="urg-dot"></span><span id="t-valasz">Válaszidő: ~4 óra</span></div>
 </div>
 
-<!-- WHATSAPP: cseréld le a számot! 36 + szám 0 nélkül -->
-<a class="wa" href="https://wa.me/36701234567" target="_blank">
-  💬<span class="wa-tip" id="t-wa-tip">Írj WhatsAppon!</span>
-</a>
+<nav>
+  <div class="logo">PRINT<span>3D</span><small>lab</small></div>
+  <div class="nav-r">
+    <button class="lang-btn" id="lang-btn">🌐 EN</button>
+    <button class="nav-btn" id="t-nav-btn">Rendelés →</button>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="tag"><span class="tag-dot"></span><span id="t-tag">Helyi gyártás · Gyors kiszállítás</span></div>
+  <h1><span id="t-h1">3D nyomtatás —</span><br><span class="tw-line"><span id="tw"></span><span class="cur"></span></span></h1>
+  <p class="hero-sub" id="t-sub">Egyedi termékek és alkatrészek, kézzel nyomtatva — a régióban, versenyképes áron.</p>
+  <div class="btns">
+    <button class="btn" id="t-btn1">Rendelés indítása →</button>
+    <button class="btn btn-o" id="t-btn2">Ötletek böngészése</button>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-v" id="c1">0h</div><div class="stat-l" id="t-s1">Átlag átfutás</div></div>
+    <div class="stat"><div class="stat-v" id="c2">0%</div><div class="stat-l" id="t-s2">Egyedi gyártás</div></div>
+    <div class="stat"><div class="stat-v" id="c3">0%</div><div class="stat-l" id="t-s3">Olcsóbb mint online</div></div>
+    <div class="stat"><div class="stat-v">📹</div><div class="stat-l" id="t-s4">Videó minden rendeléshez</div></div>
+  </div>
+</section>
+
+<div class="div"></div>
+
+<!-- PROBLEM CARDS -->
+<section class="sec">
+  <div class="eyebrow" id="t-gal-ey">Miben segítünk</div>
+  <div class="sec-t" id="t-gal-t">Valós problémák — kinyomtatva</div>
+  <div class="sec-sub" id="t-gal-sub">Ha valami nem kapható, nem passzol a méret, vagy egyedire van szükséged</div>
+  <div class="gal">
+    <a class="gc" href="#rendeles"><div class="gt"><div class="gt-fallback">🔧</div><div class="gt-label" id="tgl1">Javítás</div></div><div class="gi"><div class="gn" id="tg1">Törött alkatrész — újra működik</div><div class="gd" id="tgd1">Már nem gyártják? Küldj egy fotót, mi kinyomtatjuk — pontosan passzol.</div><div class="gp">2 000 Ft-tól<span class="gb badge-r" id="tgb1">csak itt</span></div></div></a>
+    <a class="gc" href="#rendeles"><div class="gt"><div class="gt-fallback">📐</div><div class="gt-label" id="tgl2">Méretre</div></div><div class="gi"><div class="gn" id="tg2">Boltban nincs meg a méret?</div><div class="gd" id="tgd2">Polctartó, rögzítő, adapter — ha sehol nem kapod meg, mi pontosan legyártjuk.</div><div class="gp">1 500 Ft-tól<span class="gb" id="tgb2">rendelésre</span></div></div></a>
+    <a class="gc" href="#rendeles"><div class="gt"><div class="gt-fallback">⚡</div><div class="gt-label" id="tgl3">Gyors</div></div><div class="gi"><div class="gn" id="tg3">Holnapra kell — megcsináljuk</div><div class="gd" id="tgd3">48 órán belül kész, személyesen is átveheted. Nincs hetekig tartó várakozás.</div><div class="gp" id="tgp3">Árajánlat 24h-n belül<span class="gb badge-g" id="tgb3">gyors</span></div></div></a>
+    <a class="gc" href="#rendeles"><div class="gt"><div class="gt-fallback">🏷️</div><div class="gt-label" id="tgl4">Egyedi</div></div><div class="gi"><div class="gn" id="tg4">Névvel, logóval — csak a tiéd</div><div class="gd" id="tgd4">Neved, céged logója, egyedi felirat — amit máshol nem tudsz megvenni.</div><div class="gp">2 500 Ft-tól<span class="gb" id="tgb4">egyedi</span></div></div></a>
+    <a class="gc" href="#rendeles"><div class="gt"><div class="gt-fallback">🧩</div><div class="gt-label" id="tgl5">Speciális</div></div><div class="gi"><div class="gn" id="tg5">Semmi nem passzol — mi megoldjuk</div><div class="gd" id="tgd5">Furcsa méret, régi gép, különleges igény — amit máshol visszautasítanak.</div><div class="gp" id="tgp5">Egyedi ajánlat<span class="gb badge-r" id="tgb5">kihívás</span></div></div></a>
+    <a class="gc" href="#rendeles"><div class="gt"><div class="gt-fallback">🎁</div><div class="gt-label" id="tgl6">Ajándék</div></div><div class="gi"><div class="gn" id="tg6">Egyedi ajándék amit sehol nem kapni</div><div class="gd" id="tgd6">Személyre szabva, kézzel nyomtatva — videóval együtt küldve.</div><div class="gp">2 900 Ft-tól<span class="gb badge-g" id="tgb6">népszerű</span></div></div></a>
+  </div>
+</section>
+
+<!-- MAKERWORLD SZEKCIÓ -->
+<div class="mw-bg">
+  <div class="mw-inner">
+    <div class="eyebrow" id="t-mw-ey">Nincs ötleted?</div>
+    <div class="sec-t" id="t-mw-t" style="margin-bottom:.5rem">Böngészd a MakerWorld modelljeit</div>
+    <div class="sec-sub" id="t-mw-sub">Millió ingyenes 3D modell egy helyen — ha megtetszik valami, küldd el nekünk és kinyomtatjuk.</div>
+    <div class="mw-box">
+      <div class="mw-top">
+        <div>
+          <div class="mw-badge">🌍 <span id="t-mw-badge">Millió ingyenes modell</span></div>
+          <div style="height:.6rem"></div>
+          <div class="mw-title" id="t-mw-box-title">Találd meg amit nyomtassunk — mi elkészítjük</div>
+          <div style="height:.6rem"></div>
+          <div class="mw-desc" id="t-mw-box-desc">A MakerWorld a világ egyik legnagyobb ingyenes 3D modell könyvtára. Böngészd a kategóriákat, keress rá bármire — majd küldj egy linket és mi kinyomtatjuk neked.</div>
+          <div class="mw-steps" style="margin-top:.8rem">
+            <div class="mw-step"><div class="mw-step-num">1</div><span id="t-mw-s1">Megnyitod a MakerWorld-öt és böngészel</span></div>
+            <div class="mw-step"><div class="mw-step-num">2</div><span id="t-mw-s2">Megtetszik valami — kimásolod a linket</span></div>
+            <div class="mw-step"><div class="mw-step-num">3</div><span id="t-mw-s3">Elkülded nekünk WhatsAppon — mi kinyomtatjuk</span></div>
+          </div>
+          <div style="height:1rem"></div>
+          <a class="mw-btn" href="https://makerworld.com" target="_blank" id="t-mw-btn">🔍 MakerWorld megnyitása →</a>
+        </div>
+      </div>
+      <div class="mw-preview">
+        <div class="mw-card">🏠<div class="mw-card-label" id="t-mw-c1">Otthon</div></div>
+        <div class="mw-card">🎮<div class="mw-card-label" id="t-mw-c2">Játék</div></div>
+        <div class="mw-card">🔧<div class="mw-card-label" id="t-mw-c3">Szerszám</div></div>
+        <div class="mw-card">🎨<div class="mw-card-label" id="t-mw-c4">Dekor</div></div>
+        <div class="mw-card">🚗<div class="mw-card-label" id="t-mw-c5">Autó</div></div>
+        <div class="mw-card">✨<div class="mw-card-label" id="t-mw-c6">Egyéb</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BEFORE/AFTER -->
+<div class="ba-outer" style="padding-top:2.5rem">
+  <div class="eyebrow" id="t-ba-ey">Előtte / Utána</div>
+  <div class="sec-t" id="t-ba-t" style="margin-bottom:1rem">Filamentből — kész termék, 48 óra alatt</div>
+  <div class="ba-wrap" id="ba">
+    <div class="ba-side ba-after"><div class="ba-icon">🗿</div><div class="ba-label" id="t-after">UTÁNA</div><div class="ba-desc" id="t-after-desc">Kész 3D nyomtatott termék</div></div>
+    <div class="ba-before-clip" id="ba-clip" style="width:50%"><div class="ba-before-inner"><div class="ba-icon">🧵</div><div class="ba-label" id="t-before">ELŐTTE</div><div class="ba-desc" id="t-before-desc">Nyers filament tekercs</div></div></div>
+    <div class="ba-handle" id="ba-handle" style="left:50%"></div>
+  </div>
+  <div class="ba-hint" id="t-ba-hint">← Húzd jobbra-balra →</div>
+</div>
+
+<!-- SLOT -->
+<section class="slot-s" style="padding-top:1.5rem">
+  <div class="slot-b">
+    <div class="slot-l"><span class="slot-d"></span><div class="slot-t" id="t-slot-txt">Ezen a héten csak <strong>2 szabad slot</strong> maradt!</div></div>
+    <div><div class="bar-bg"><div class="bar-f"></div></div><div class="bar-s" id="t-bar-s">6 / 8 hely foglalt</div></div>
+    <button class="btn" id="t-slot-btn">Foglalom →</button>
+  </div>
+</section>
+
+<div class="div"></div>
+
+<!-- REVIEWS -->
+<section class="rev-s">
+  <div class="rev-i">
+    <div class="eyebrow" id="t-rev-ey">Vélemények</div>
+    <div class="sec-t" id="t-rev-t">Mit mondanak a vevők</div>
+    <div class="rev-g">
+      <div class="rc"><div class="rt"><div class="rav">KM</div><div><div class="rn">Kovács Márton</div><div class="rl">Miskolc</div></div></div><div class="rs">★★★★★</div><div class="rtx" id="tr1">"Törött alkatrészt nyomtattak nekem, pontosan passzolt. Másnap már nálam volt — és az ár is meglepett."</div><div class="rbg" id="trb1">✓ Visszatérő vevő</div></div>
+      <div class="rc"><div class="rt"><div class="rav">SV</div><div><div class="rn">Szabó Vivien</div><div class="rl">Eger</div></div></div><div class="rs">★★★★★</div><div class="rtx" id="tr2">"Kaptam egy videót is a nyomtatásról — teljesen lenyűgözött. Ajándékba rendeltem, a barátom imádta!"</div><div class="rbg" id="trb2">✓ Ellenőrzött vásárló</div></div>
+      <div class="rc"><div class="rt"><div class="rav">TZ</div><div><div class="rn">Tóth Zoltán</div><div class="rl">Miskolc</div></div></div><div class="rs">★★★★★</div><div class="rtx" id="tr3">"Prototípust készíttettem. Gyors, precíz, és az ár töredéke volt annak, amit máshol kértek."</div><div class="rbg" id="trb3">✓ Üzleti megrendelő</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY -->
+<section class="sec">
+  <div class="eyebrow" id="t-why-ey">Előnyeink</div>
+  <div class="sec-t" id="t-why-t">Miért válassz minket?</div>
+  <div class="why-g">
+    <div class="wc"><div class="wi">💰</div><h3 id="tw1">Versenyképes ár</h3><p id="twp1">Helyi gyártás, alacsony rezsi — átlagosan 30%-kal olcsóbb mint az online szolgáltatók.</p></div>
+    <div class="wc"><div class="wi">📹</div><h3 id="tw2h">Rendelési videó</h3><p id="twp2">Minden megrendelésről videót kapsz a nyomtatás folyamatáról.</p></div>
+    <div class="wc"><div class="wi">📍</div><h3 id="tw3h">Helyi, gyors</h3><p id="twp3">48 órán belül kész, és a régióban személyesen is átveheted.</p></div>
+    <div class="wc"><div class="wi">⚙️</div><h3 id="tw4h">Teljesen egyedi</h3><p id="twp4">Hozd a saját fájlt, vagy segítünk megtervezni — szín, anyag, méret mind a tiéd.</p></div>
+  </div>
+</section>
+
+<!-- MATERIALS -->
+<div class="mat-bg">
+  <div class="mat-inner">
+    <div class="eyebrow" id="t-mat-ey">Alapanyagok</div>
+    <div class="sec-t" id="t-mat-t">Miből nyomtatunk?</div>
+    <div class="sec-sub" id="t-mat-sub">A feladathoz mindig a megfelelő anyagot választjuk — ha nem tudod melyik kell, segítünk.</div>
+    <div class="mat-grid">
+      <div class="mat-card"><div class="mat-icon">🟢</div><div class="mat-name">PLA</div><div class="mat-use" id="t-mat-pla-use">Általános, dekor, prototípus</div><div class="mat-desc" id="t-mat-pla-desc">A legelterjedtebb anyag. Könnyen nyomtatható, szép felület, sokféle szín. Beltéri használatra ideális.</div></div>
+      <div class="mat-card"><div class="mat-icon">🔵</div><div class="mat-name">PETG</div><div class="mat-use" id="t-mat-petg-use">Tartós, funkcionális alkatrész</div><div class="mat-desc" id="t-mat-petg-desc">Erősebb és rugalmasabb mint a PLA. Nedvességálló, jó hőtűrés. Alkatrészekhez, tartókhoz ajánlott.</div></div>
+      <div class="mat-card"><div class="mat-icon">🟠</div><div class="mat-name">TPU</div><div class="mat-use" id="t-mat-tpu-use">Rugalmas, ütésálló</div><div class="mat-desc" id="t-mat-tpu-desc">Gumiszeru, rugalmas anyag. Tokokhoz, talpbetétekhez, rezgéscsillapítóhoz tökéletes.</div></div>
+      <div class="mat-card"><div class="mat-icon">⚫</div><div class="mat-name">ABS / ASA</div><div class="mat-use" id="t-mat-abs-use">Kültéri, hőálló</div><div class="mat-desc" id="t-mat-abs-desc">UV- és hőálló anyag. Autós kiegészítőkhöz, kültéri használatra és magasabb hőmérsékletű helyekre.</div></div>
+      <div class="mat-card"><div class="mat-icon">⚪</div><div class="mat-name">Nylon</div><div class="mat-use" id="t-mat-nylon-use">Műszaki, nagy terhelés</div><div class="mat-desc" id="t-mat-nylon-desc">Kiváló mechanikai tulajdonságok. Fogaskerekekhez, csapágyakhoz, erősen terhelt alkatrészekhez.</div></div>
+      <div class="mat-card" style="border-color:#00b4ff22"><div class="mat-icon">❓</div><div class="mat-name" id="t-mat-other-name">Nem tudod melyik kell?</div><div class="mat-use" id="t-mat-other-use">Segítünk kiválasztani</div><div class="mat-desc" id="t-mat-other-desc">Írj nekünk — a felhasználás alapján javasoljuk a legjobb anyagot és színt.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- PRICE -->
+<div class="price-bg">
+  <div class="pb">
+    <div class="pt" id="t-pr-ey">⚡ Árainkról</div>
+    <div class="pbig" id="t-pr-big">Átlagosan <span>30%</span>-kal olcsóbb</div>
+    <div class="psub" id="t-pr-sub">mint az online 3D nyomtatós szolgáltatók — közvetítők és felesleges marzsok nélkül</div>
+    <div class="pfs">
+      <div class="pf"><span class="pd"></span><span id="tpf1">Ingyenes árajánlat</span></div>
+      <div class="pf"><span class="pd"></span><span id="tpf2">Nincs rejtett díj</span></div>
+      <div class="pf"><span class="pd"></span><span id="tpf3">Garanciális újranyomtatás</span></div>
+    </div>
+    <button class="btn" id="t-pr-btn">Ingyenes árajánlat kérése →</button>
+  </div>
+</div>
+
+<!-- STEPS -->
+<section class="sec" id="rendeles">
+  <div class="eyebrow" id="t-st-ey">Hogyan működik?</div>
+  <div class="sec-t" id="t-st-t">4 lépés, és kész</div>
+  <div class="steps-g">
+    <div class="si"><div class="sc">01</div><h4 id="ts1">Írj nekünk</h4><p id="tsp1">Leírást, fotót vagy fájlt küldöd — bármi elég a kezdéshez.</p></div>
+    <div class="si"><div class="sc">02</div><h4 id="ts2">Árajánlat 24h-n belül</h4><p id="tsp2">Pontos árat, anyagot és átfutási időt küldünk.</p></div>
+    <div class="si"><div class="sc">03</div><h4 id="ts3">Nyomtatás + videó</h4><p id="tsp3">Elkészítjük és videót küldünk a folyamatról.</p></div>
+    <div class="si"><div class="sc">04</div><h4 id="ts4">Átvétel vagy szállítás</h4><p id="tsp4">Személyes átvétel a régióban, vagy MPL / GLS futárral.</p></div>
+  </div>
+</section>
+
+<div class="div"></div>
+
+<!-- FAQ -->
+<div class="faq-bg">
+  <div class="faq-inner">
+    <div class="eyebrow" id="t-faq-ey">GYIK</div>
+    <div class="sec-t" id="t-faq-t">Gyakori kérdések</div>
+    <div class="faq-list" id="faq-list"></div>
+  </div>
+</div>
+
+<!-- CTA -->
+<section class="cta-s">
+  <div class="cta-i">
+    <div class="eyebrow" id="t-cta-ey">Kezdjük el</div>
+    <h2 id="t-cta-h">Az ötleted már félúton van</h2>
+    <p id="t-cta-p">Írj egy üzenetet — 24 órán belül árajánlattal és anyagjavaslattal válaszolunk.</p>
+    <div class="btns">
+      <button class="btn" id="t-cta-btn1">Rendelés indítása →</button>
+      <button class="btn btn-o" id="t-cta-btn2">Kérdésem van</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="fl">PRINT<span>3D</span>lab</div>
+  <div class="fc" id="t-footer">© 2026 · Helyi gyártás, valódi minőség</div>
+</footer>
+</div>
+
+<a class="wa" href="https://wa.me/36701234567" target="_blank">💬<span class="wa-tip" id="t-wa-tip">Írj WhatsAppon!</span></a>
 
 <div class="mob-cta">
-  <a class="btn" style="flex:1" href="https://YOUR-SHOP.myshopify.com" id="t-mob1">Rendelés →</a>
-  <a class="btn btn-o" style="flex:1" href="mailto:hello@print3dlab.hu" id="t-mob2">Árajánlat</a>
+  <button class="btn" style="flex:1" id="t-mob1">Rendelés →</button>
+  <button class="btn btn-o" style="flex:1" id="t-mob2">Árajánlat</button>
 </div>
 
 <script>
@@ -496,11 +474,51 @@ window.addEventListener('touchmove',e=>{if(drag)setBA(e.touches[0].clientX);},{p
 window.addEventListener('mouseup',()=>drag=false);
 window.addEventListener('touchend',()=>drag=false);
 
-// LANGUAGE
-const T={hu:{'lang-btn':'🌐 EN','t-aktiv':'Aktív:','t-rendeles':'rendelés','t-slot':'Szabad slot:','t-valasz':'Válasz: ~4 óra','t-nav-btn':'Rendelés →','t-tag':'Helyi gyártás · Gyors átfutás','t-h1':'3D nyomtatás —','t-sub':'Egyedi termékek, alkatrészek, designdarabok. Kézzel, filamentről — neked, a régióban.','t-btn1':'Egyedi rendelés →','t-btn2':'Termékek böngészése','t-s1':'Átlag átfutás','t-s2':'Egyedi gyártás','t-s3':'Versenytárshoz képest','t-s4':'Videó rendeléshez','t-gal-ey':'Miben segítünk','t-gal-t':'Valós problémák — kinyomtatva','t-gal-sub':'Ha valami nem kapható, nem passzol, vagy csak a tiéd kell legyen','tgl1':'Alkatrész','tg1':'Törött alkatrész — újra működik','tgd1':'Már nem gyártják? Mindegy. Fényképet küldöd, mi kinyomtatjuk — pontosan passzol.','tgb1':'csak itt','tgl2':'Méretre','tg2':'Boltban nincs meg a méret?','tgd2':'Polctartó, rögzítő, adapter — ha sehol nem kapod meg, mi pontosan legyártjuk.','tgb2':'rendelésre','tgl3':'Gyors','tg3':'Holnapra kell — megcsináljuk','tgd3':'24-48 óra alatt kész, személyesen átveheted. Nincs hetekig tartó várakozás.','tgp3':'Árajánlat 24h-n belül','tgb3':'gyors','tgl4':'Egyedi','tg4':'Névvel, logóval — csak a tiéd','tgd4':'Neved, céged logója, egyedi felirat — olyat kapsz amit máshol nem tudsz megvenni.','tgb4':'egyedi','tgl5':'Speciális','tg5':'Ha semmi nem passzol — mi megoldjuk','tgd5':'Furcsa méret, régi gép, különleges igény — amit máshol visszautasítanak, mi megcsináljuk.','tgp5':'Egyedi ajánlat','tgb5':'kihívás','tgl6':'Ajándék','tg6':'Egyedi ajándék amit sehol nem veszel meg','tgd6':'Személyre szabva, kézzel nyomtatva — olyan ajándék ami tényleg meglep, videóval együtt.','tgb6':'népszerű','t-ba-ey':'Előtte / Utána','t-ba-t':'Filamentből — kész termék','t-before':'ELŐTTE','t-before-desc':'Nyers filament tekercs — csak az alapanyag','t-after':'UTÁNA','t-after-desc':'Kész 3D nyomtatott termék — 48 óra alatt','t-ba-hint':'← Húzd jobbra-balra →','t-slot-txt':'Ezen a héten csak <strong>2 szabad slot<\/strong> maradt!','t-bar-s':'6 / 8 slot foglalt','t-slot-btn':'Foglalom →','t-rev-ey':'Vélemények','t-rev-t':'Mit mondanak a vevők','tr1':'"Törött alkatrészt nyomtattak, pontosan passzolt. Másnap már nálam volt."','trb1':'✓ Visszatérő vevő','tr2':'"A videót amit küldtek teljesen lenyűgözött. Ajándékba rendeltem, a barátom imádta!"','trb2':'✓ Ellenőrzött vásárlás','tr3':'"Prototípust kértem. Gyors, precíz, az ár meg sem közelítette amit máshol kértek."','trb3':'✓ Üzleti megrendelő','t-why-ey':'Miért mi?','t-why-t':'Technológia, ami megbízható','tw1':'Jobb ár','twp1':'Helyi gyártás, alacsony rezsi. Rejtett díjak nélkül.','tw2h':'Videó','twp2':'Minden rendelésről felvételt kapsz.','tw3h':'Helyi','twp3':'Személyes átvétel is van.','tw4h':'Egyedi','twp4':'Saját fájl vagy ötlet — mind a tiéd.','t-pr-ey':'⚡ Garanciánk','t-pr-big':'Átlagosan <span>30%<\/span>-kal olcsóbb','t-pr-sub':'mint az online szolgáltatók — felesleges marzsok nélkül','tpf1':'Ingyenes árajánlat','tpf2':'Nincs rejtett díj','tpf3':'Garanciális csere','t-pr-btn':'Ingyenes árajánlat →','t-st-ey':'A folyamat','t-st-t':'4 lépés, és kész','ts1':'Írj nekünk','tsp1':'Elképzelés vagy fájl — bármi elég.','ts2':'Árajánlat 24h','tsp2':'Pontos ár és átfutási idő.','ts3':'Nyomtatás','tsp3':'Videót kapsz a folyamatról.','ts4':'Szállítás','tsp4':'MPL, GLS, vagy személyesen.','t-cta-ey':'Kezdjük el','t-cta-h':'Az ötleted már félúton van','t-cta-p':'Írj egy üzenetet — 24 órán belül visszajelzünk.','t-cta-btn1':'Rendelés indítása →','t-cta-btn2':'Kérdésem van','t-footer':'© 2026 · Helyi gyártás, valódi minőség','t-wa-tip':'Írj WhatsAppon!','t-mob1':'Rendelés →','t-mob2':'Árajánlat'},en:{'lang-btn':'🌐 HU','t-aktiv':'Active:','t-rendeles':'orders','t-slot':'Free slot:','t-valasz':'Response: ~4 hrs','t-nav-btn':'Order →','t-tag':'Local production · Fast turnaround','t-h1':'3D printing —','t-sub':'Custom products, parts, design pieces. Handmade, layer by layer — for you, locally.','t-btn1':'Custom order →','t-btn2':'Browse products','t-s1':'Avg. turnaround','t-s2':'Custom made','t-s3':'vs competitors','t-s4':'Video per order','t-gal-ey':'How we help','t-gal-t':'Real problems — printed','t-gal-sub':'If something is unavailable, wrong size, or needs to be uniquely yours','tgl1':'Parts','tg1':'Broken part — working again','tgd1':'No longer manufactured? Send a photo, we print it — fits perfectly.','tgb1':'only here','tgl2':'Custom size','tg2':'Can\'t find the right size?','tgd2':'Shelf bracket, mount, adapter — if you can\'t find it, we make it exactly right.','tgb2':'on order','tgl3':'Fast','tg3':'Need it tomorrow — we\'ll do it','tgd3':'Ready in 24-48 hours, pickup available. No weeks of waiting.','tgp3':'Quote within 24h','tgb3':'fast','tgl4':'Unique','tg4':'With your name, logo — yours only','tgd4':'Your name, company logo, custom text — something you can\'t buy anywhere else.','tgb4':'custom','tgl5':'Special','tg5':'Nothing fits — we solve it','tgd5':'Odd size, old machine, special need — what others refuse, we make happen.','tgp5':'Custom quote','tgb5':'challenge','tgl6':'Gift','tg6':'A unique gift you can\'t buy anywhere','tgd6':'Personalized, handprinted — a gift that truly surprises, with a video.','tgb6':'popular','t-ba-ey':'Before / After','t-ba-t':'From filament — to finished product','t-before':'BEFORE','t-before-desc':'Raw filament spool — just the material','t-after':'AFTER','t-after-desc':'Finished 3D printed product — within 48 hours','t-ba-hint':'← Drag left-right →','t-slot-txt':'Only <strong>2 free slots<\/strong> left this week!','t-bar-s':'6 / 8 slots taken','t-slot-btn':'Reserve →','t-rev-ey':'Reviews','t-rev-t':'What customers say','tr1':'"They printed a broken part, fit perfectly. Arrived next day."','trb1':'✓ Returning customer','tr2':'"The video they sent was amazing. Ordered as gift, loved it!"','trb2':'✓ Verified purchase','tr3':'"Asked for a prototype. Fast, precise, price didn\'t come close to others."','trb3':'✓ Business customer','t-why-ey':'Why us?','t-why-t':'Technology you can trust','tw1':'Better price','twp1':'Local production, low overhead. No hidden fees.','tw2h':'Video','twp2':'You get a recording of every order.','tw3h':'Local','twp3':'Personal pickup available.','tw4h':'Custom','twp4':'Your file or idea — it\'s all yours.','t-pr-ey':'⚡ Our guarantee','t-pr-big':'On average <span>30%<\/span> cheaper','t-pr-sub':'than online services — no unnecessary margins','tpf1':'Free quote','tpf2':'No hidden fees','tpf3':'Warranty replacement','t-pr-btn':'Free quote →','t-st-ey':'The process','t-st-t':'4 steps, done','ts1':'Write to us','tsp1':'Idea or file — anything works.','ts2':'Quote in 24h','tsp2':'Exact price and turnaround.','ts3':'Printing','tsp3':'You get a video of the process.','ts4':'Delivery','tsp4':'MPL, GLS, or in person.','t-cta-ey':"Let's start",'t-cta-h':'Your idea is halfway there','t-cta-p':"Send a message — we'll reply within 24 hours.",'t-cta-btn1':'Start order →','t-cta-btn2':'I have a question','t-footer':'© 2026 · Local production, real quality','t-wa-tip':'Message on WhatsApp!','t-mob1':'Order →','t-mob2':'Quote'}};
+// FAQ
+const faqsHU=[
+  {q:'Mennyi ideig tart egy rendelés?',a:'Átlagosan 48 óra az egyszerűbb daraboknál. Összetettebb tárgyaknál 3-5 munkanap. Minden árajánlatban pontosan megadjuk az átfutási időt.'},
+  {q:'Milyen fájlt küldjek?',a:'STL, 3MF, OBJ formátumokat fogadunk el. Ha nincs fájlod — csak egy fotó vagy leírás is elég, mi segítünk megtervezni.'},
+  {q:'Van személyes átvétel?',a:'Igen, a régióban személyes átvétel is lehetséges. Az árajánlatkor egyezünk a pontos helyszínről.'},
+  {q:'Mi van ha nem megfelelő a termék?',a:'Garanciális újranyomtatást vállalunk. Ha a nyomtatás hibás vagy nem passzol, díjmentesen újranyomtatjuk.'},
+  {q:'Mennyibe kerül nagyjából?',a:'Az ár az anyagtól, mérettől és összetettségtől függ. Kisebb tárgyak 1 000–3 000 Ft-tól, összetettebb darabok 5 000 Ft-tól. Árajánlat mindig ingyenes és 24 órán belül megérkezik.'},
+  {q:'Milyen fizetési módokat fogadtok el?',a:'Banki átutalás, készpénz személyes átvételnél, és online fizetés is lehetséges.'},
+];
+const faqsEN=[
+  {q:'How long does an order take?',a:'On average 48 hours for simpler items. For complex objects, 3-5 working days. Every quote includes the exact turnaround time.'},
+  {q:'What file should I send?',a:'We accept STL, 3MF, OBJ formats. If you don\'t have a file — a photo or description is enough, we\'ll help design it.'},
+  {q:'Is local pickup available?',a:'Yes, local pickup is available in the region. We agree on the exact location when sending the quote.'},
+  {q:'What if the product is not right?',a:'We offer warranty reprinting. If the print is faulty or doesn\'t fit, we reprint it free of charge.'},
+  {q:'How much does it cost roughly?',a:'Price depends on material, size and complexity. Smaller items from 1,000–3,000 HUF, more complex ones from 5,000 HUF. Quotes are always free and arrive within 24 hours.'},
+  {q:'What payment methods do you accept?',a:'Bank transfer, cash on pickup, and online payment are all available.'},
+];
 
-document.getElementById('lang-btn').addEventListener('click',()=>{lang=lang==='hu'?'en':'hu';const d=T[lang];Object.keys(d).forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=d[id];});pi=0;startTw();});
+function renderFaq(){
+  const list=document.getElementById('faq-list');
+  list.innerHTML='';
+  const faqs=lang==='hu'?faqsHU:faqsEN;
+  faqs.forEach(f=>{
+    const item=document.createElement('div');
+    item.className='faq-item';
+    item.innerHTML='<button class="faq-q">'+f.q+'<span class="faq-arr">▾</span></button><div class="faq-a">'+f.a+'</div>';
+    item.querySelector('.faq-q').addEventListener('click',()=>item.classList.toggle('open'));
+    list.appendChild(item);
+  });
+}
+renderFaq();
+
+// LANGUAGE
+const T={
+  hu:{'lang-btn':'🌐 EN','t-aktiv':'Aktív:','t-rendeles':'rendelés folyamatban','t-slot':'Szabad slot:','t-valasz':'Válaszidő: ~4 óra','t-nav-btn':'Rendelés →','t-tag':'Helyi gyártás · Gyors kiszállítás','t-h1':'3D nyomtatás —','t-sub':'Egyedi termékek és alkatrészek, kézzel nyomtatva — a régióban, versenyképes áron.','t-btn1':'Rendelés indítása →','t-btn2':'Ötletek böngészése','t-s1':'Átlag átfutás','t-s2':'Egyedi gyártás','t-s3':'Olcsóbb mint online','t-s4':'Videó minden rendeléshez','t-gal-ey':'Miben segítünk','t-gal-t':'Valós problémák — kinyomtatva','t-gal-sub':'Ha valami nem kapható, nem passzol a méret, vagy egyedire van szükséged','tgl1':'Javítás','tg1':'Törött alkatrész — újra működik','tgd1':'Már nem gyártják? Küldj egy fotót, mi kinyomtatjuk — pontosan passzol.','tgb1':'csak itt','tgl2':'Méretre','tg2':'Boltban nincs meg a méret?','tgd2':'Polctartó, rögzítő, adapter — ha sehol nem kapod meg, mi pontosan legyártjuk.','tgb2':'rendelésre','tgl3':'Gyors','tg3':'Holnapra kell — megcsináljuk','tgd3':'48 órán belül kész, személyesen is átveheted.','tgp3':'Árajánlat 24h-n belül','tgb3':'gyors','tgl4':'Egyedi','tg4':'Névvel, logóval — csak a tiéd','tgd4':'Neved, céged logója, egyedi felirat — amit máshol nem tudsz megvenni.','tgb4':'egyedi','tgl5':'Speciális','tg5':'Semmi nem passzol — mi megoldjuk','tgd5':'Furcsa méret, régi gép, különleges igény — amit máshol visszautasítanak.','tgp5':'Egyedi ajánlat','tgb5':'kihívás','tgl6':'Ajándék','tg6':'Egyedi ajándék amit sehol nem kapni','tgd6':'Személyre szabva, kézzel nyomtatva — videóval együtt küldve.','tgb6':'népszerű','t-mw-ey':'Nincs ötleted?','t-mw-t':'Böngészd a MakerWorld modelljeit','t-mw-sub':'Millió ingyenes 3D modell egy helyen — ha megtetszik valami, küldd el nekünk és kinyomtatjuk.','t-mw-badge':'Millió ingyenes modell','t-mw-box-title':'Találd meg amit nyomtassunk — mi elkészítjük','t-mw-box-desc':'A MakerWorld a világ egyik legnagyobb ingyenes 3D modell könyvtára. Böngészd a kategóriákat, keress rá bármire — majd küldj egy linket és mi kinyomtatjuk neked.','t-mw-s1':'Megnyitod a MakerWorld-öt és böngészel','t-mw-s2':'Megtetszik valami — kimásolod a linket','t-mw-s3':'Elkülded nekünk WhatsAppon — mi kinyomtatjuk','t-mw-btn':'🔍 MakerWorld megnyitása →','t-mw-c1':'Otthon','t-mw-c2':'Játék','t-mw-c3':'Szerszám','t-mw-c4':'Dekor','t-mw-c5':'Autó','t-mw-c6':'Egyéb','t-ba-ey':'Előtte / Utána','t-ba-t':'Filamentből — kész termék, 48 óra alatt','t-before':'ELŐTTE','t-before-desc':'Nyers filament tekercs','t-after':'UTÁNA','t-after-desc':'Kész 3D nyomtatott termék','t-ba-hint':'← Húzd jobbra-balra →','t-slot-txt':'Ezen a héten csak <strong>2 szabad slot<\/strong> maradt!','t-bar-s':'6 / 8 hely foglalt','t-slot-btn':'Foglalom →','t-rev-ey':'Vélemények','t-rev-t':'Mit mondanak a vevők','tr1':'"Törött alkatrészt nyomtattak nekem, pontosan passzolt. Másnap már nálam volt — és az ár is meglepett."','trb1':'✓ Visszatérő vevő','tr2':'"Kaptam egy videót is a nyomtatásról — teljesen lenyűgözött. Ajándékba rendeltem, a barátom imádta!"','trb2':'✓ Ellenőrzött vásárló','tr3':'"Prototípust készíttettem. Gyors, precíz, és az ár töredéke volt annak, amit máshol kértek."','trb3':'✓ Üzleti megrendelő','t-why-ey':'Előnyeink','t-why-t':'Miért válassz minket?','tw1':'Versenyképes ár','twp1':'Helyi gyártás, alacsony rezsi — átlagosan 30%-kal olcsóbb mint az online szolgáltatók.','tw2h':'Rendelési videó','twp2':'Minden megrendelésről videót kapsz a nyomtatás folyamatáról.','tw3h':'Helyi, gyors','twp3':'48 órán belül kész, és a régióban személyesen is átveheted.','tw4h':'Teljesen egyedi','twp4':'Hozd a saját fájlt, vagy segítünk megtervezni — szín, anyag, méret mind a tiéd.','t-mat-ey':'Alapanyagok','t-mat-t':'Miből nyomtatunk?','t-mat-sub':'A feladathoz mindig a megfelelő anyagot választjuk — ha nem tudod melyik kell, segítünk.','t-mat-pla-use':'Általános, dekor, prototípus','t-mat-pla-desc':'A legelterjedtebb anyag. Könnyen nyomtatható, szép felület, sokféle szín. Beltéri használatra ideális.','t-mat-petg-use':'Tartós, funkcionális alkatrész','t-mat-petg-desc':'Erősebb és rugalmasabb mint a PLA. Nedvességálló, jó hőtűrés. Alkatrészekhez, tartókhoz ajánlott.','t-mat-tpu-use':'Rugalmas, ütésálló','t-mat-tpu-desc':'Gumiszeru, rugalmas anyag. Tokokhoz, talpbetétekhez, rezgéscsillapítóhoz tökéletes.','t-mat-abs-use':'Kültéri, hőálló','t-mat-abs-desc':'UV- és hőálló anyag. Autós kiegészítőkhöz, kültéri használatra és magasabb hőmérsékletű helyekre.','t-mat-nylon-use':'Műszaki, nagy terhelés','t-mat-nylon-desc':'Kiváló mechanikai tulajdonságok. Fogaskerekekhez, csapágyakhoz, erősen terhelt alkatrészekhez.','t-mat-other-name':'Nem tudod melyik kell?','t-mat-other-use':'Segítünk kiválasztani','t-mat-other-desc':'Írj nekünk — a felhasználás alapján javasoljuk a legjobb anyagot és színt.','t-pr-ey':'⚡ Árainkról','t-pr-big':'Átlagosan <span>30%<\/span>-kal olcsóbb','t-pr-sub':'mint az online 3D nyomtatós szolgáltatók — közvetítők és felesleges marzsok nélkül','tpf1':'Ingyenes árajánlat','tpf2':'Nincs rejtett díj','tpf3':'Garanciális újranyomtatás','t-pr-btn':'Ingyenes árajánlat kérése →','t-st-ey':'Hogyan működik?','t-st-t':'4 lépés, és kész','ts1':'Írj nekünk','tsp1':'Leírást, fotót vagy fájlt küldöd — bármi elég a kezdéshez.','ts2':'Árajánlat 24h-n belül','tsp2':'Pontos árat, anyagot és átfutási időt küldünk.','ts3':'Nyomtatás + videó','tsp3':'Elkészítjük és videót küldünk a folyamatról.','ts4':'Átvétel vagy szállítás','tsp4':'Személyes átvétel a régióban, vagy MPL / GLS futárral.','t-faq-ey':'GYIK','t-faq-t':'Gyakori kérdések','t-cta-ey':'Kezdjük el','t-cta-h':'Az ötleted már félúton van','t-cta-p':'Írj egy üzenetet — 24 órán belül árajánlattal és anyagjavaslattal válaszolunk.','t-cta-btn1':'Rendelés indítása →','t-cta-btn2':'Kérdésem van','t-footer':'© 2026 · Helyi gyártás, valódi minőség','t-wa-tip':'Írj WhatsAppon!','t-mob1':'Rendelés →','t-mob2':'Árajánlat'},
+  en:{'lang-btn':'🌐 HU','t-aktiv':'Active:','t-rendeles':'orders in progress','t-slot':'Free slot:','t-valasz':'Response time: ~4 hrs','t-nav-btn':'Order →','t-tag':'Local production · Fast delivery','t-h1':'3D printing —','t-sub':'Custom products and parts, handprinted locally — at competitive prices.','t-btn1':'Start order →','t-btn2':'Browse ideas','t-s1':'Avg. turnaround','t-s2':'Custom made','t-s3':'Cheaper than online','t-s4':'Video with every order','t-gal-ey':'How we help','t-gal-t':'Real problems — printed','t-gal-sub':'When something is unavailable, wrong size, or needs to be uniquely yours','tgl1':'Repair','tg1':'Broken part — working again','tgd1':'No longer manufactured? Send a photo, we print it — fits perfectly.','tgb1':'only here','tgl2':'Custom size','tg2':'Can\'t find the right size?','tgd2':'Shelf bracket, mount, adapter — if you can\'t find it, we make it exactly right.','tgb2':'on order','tgl3':'Fast','tg3':'Need it tomorrow — we\'ll do it','tgd3':'Ready within 48 hours, pickup available.','tgp3':'Quote within 24h','tgb3':'fast','tgl4':'Unique','tg4':'With your name, logo — yours only','tgd4':'Your name, company logo, custom text — something you can\'t buy anywhere else.','tgb4':'custom','tgl5':'Special','tg5':'Nothing fits — we solve it','tgd5':'Odd size, old machine, special need — what others refuse, we make happen.','tgp5':'Custom quote','tgb5':'challenge','tgl6':'Gift','tg6':'A unique gift you can\'t buy anywhere','tgd6':'Personalized, handprinted — sent with a video.','tgb6':'popular','t-mw-ey':'No idea what to print?','t-mw-t':'Browse MakerWorld models','t-mw-sub':'Millions of free 3D models in one place — find something you like and we\'ll print it for you.','t-mw-badge':'Millions of free models','t-mw-box-title':'Find what to print — we\'ll make it','t-mw-box-desc':'MakerWorld is one of the world\'s largest free 3D model libraries. Browse categories, search for anything — then send us a link and we\'ll print it for you.','t-mw-s1':'Open MakerWorld and browse','t-mw-s2':'Find something you like — copy the link','t-mw-s3':'Send it to us on WhatsApp — we\'ll print it','t-mw-btn':'🔍 Open MakerWorld →','t-mw-c1':'Home','t-mw-c2':'Toys','t-mw-c3':'Tools','t-mw-c4':'Decor','t-mw-c5':'Car','t-mw-c6':'Other','t-ba-ey':'Before / After','t-ba-t':'From filament — to finished product, within 48 hours','t-before':'BEFORE','t-before-desc':'Raw filament spool','t-after':'AFTER','t-after-desc':'Finished 3D printed product','t-ba-hint':'← Drag left-right →','t-slot-txt':'Only <strong>2 free slots<\/strong> left this week!','t-bar-s':'6 / 8 spots taken','t-slot-btn':'Reserve →','t-rev-ey':'Reviews','t-rev-t':'What customers say','tr1':'"They printed a broken part, fit perfectly. Arrived next day — the price surprised me too."','trb1':'✓ Returning customer','tr2':'"I got a video of the printing — absolutely loved it. Ordered as a gift, my friend was thrilled!"','trb2':'✓ Verified buyer','tr3':'"Had a prototype made. Fast, precise, and a fraction of what others would charge."','trb3':'✓ Business customer','t-why-ey':'Our advantages','t-why-t':'Why choose us?','tw1':'Competitive pricing','twp1':'Local production, low overhead — on average 30% cheaper than online services.','tw2h':'Order video','twp2':'You receive a video of the printing process with every order.','tw3h':'Local & fast','twp3':'Ready within 48 hours, with personal pickup available in the region.','tw4h':'Fully custom','twp4':'Bring your own file or we help design it — color, material, size all yours.','t-mat-ey':'Materials','t-mat-t':'What do we print with?','t-mat-sub':'We always choose the right material for the job — if you\'re not sure which one, we\'ll help.','t-mat-pla-use':'General, decor, prototype','t-mat-pla-desc':'The most common material. Easy to print, great finish, many colors. Ideal for indoor use.','t-mat-petg-use':'Durable, functional parts','t-mat-petg-desc':'Stronger and more flexible than PLA. Moisture resistant, good heat tolerance. Great for parts and holders.','t-mat-tpu-use':'Flexible, impact-resistant','t-mat-tpu-desc':'Rubber-like, flexible material. Perfect for cases, insoles, and vibration dampeners.','t-mat-abs-use':'Outdoor, heat-resistant','t-mat-abs-desc':'UV and heat resistant. For car accessories, outdoor use and high-temperature environments.','t-mat-nylon-use':'Technical, high load','t-mat-nylon-desc':'Excellent mechanical properties. For gears, bearings and heavily loaded parts.','t-mat-other-name':'Not sure which material?','t-mat-other-use':'We\'ll help you choose','t-mat-other-desc':'Write to us — we\'ll recommend the best material and color based on your use case.','t-pr-ey':'⚡ Our pricing','t-pr-big':'On average <span>30%<\/span> cheaper','t-pr-sub':'than online 3D printing services — no middlemen, no unnecessary margins','tpf1':'Free quote','tpf2':'No hidden fees','tpf3':'Warranty reprint','t-pr-btn':'Request free quote →','t-st-ey':'How it works','t-st-t':'4 steps, done','ts1':'Contact us','tsp1':'Send a description, photo or file — anything works to get started.','ts2':'Quote within 24h','tsp2':'We send exact price, material and turnaround time.','ts3':'Print + video','tsp3':'We make your product and send a video of the process.','ts4':'Pickup or delivery','tsp4':'Personal pickup in the region, or MPL / GLS courier.','t-faq-ey':'FAQ','t-faq-t':'Frequently asked questions','t-cta-ey':"Let's start",'t-cta-h':'Your idea is halfway there','t-cta-p':"Send a message — we'll reply within 24 hours with a quote and material suggestion.",'t-cta-btn1':'Start order →','t-cta-btn2':'I have a question','t-footer':'© 2026 · Local production, real quality','t-wa-tip':'Message on WhatsApp!','t-mob1':'Order →','t-mob2':'Quote'}
+};
+
+document.getElementById('lang-btn').addEventListener('click',()=>{
+  lang=lang==='hu'?'en':'hu';
+  const d=T[lang];
+  Object.keys(d).forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=d[id];});
+  renderFaq();
+  pi=0;startTw();
+});
+
 setInterval(()=>{if(Math.random()>.7)document.getElementById('ao').textContent=Math.floor(Math.random()*3)+2;},8000);
 </script>
-</body>
-</html>

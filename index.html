@@ -94,12 +94,11 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:.85rem
 .mw-n{width:20px;height:20px;border-radius:50%;background:#00b4ff18;border:1px solid #00b4ff33;display:flex;align-items:center;justify-content:center;font-size:10px;color:#00b4ff;flex-shrink:0;margin-top:1px}
 
 /* COMPARISON TABLE */
-.comp{background:#04091a;border:1px solid #0e1a33;border-radius:13px;overflow:hidden;margin-bottom:1.4rem;overflow-x:auto}
-.comp-inner{min-width:400px}
-.comp-h{display:grid;grid-template-columns:90px repeat(5,1fr);padding:.6rem .8rem;border-bottom:1px solid #0e1a33}
-.comp-hc{font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:#4a6a80;text-align:center;padding:0 2px}
+.comp{background:#04091a;border:1px solid #0e1a33;border-radius:13px;overflow:hidden;margin-bottom:1.4rem}
+.comp-h{display:grid;grid-template-columns:80px repeat(4,1fr);padding:.6rem .8rem;border-bottom:1px solid #0e1a33}
+.comp-hc{font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:#4a6a80;text-align:center;padding:0 2px}
 .comp-hc:first-child{text-align:left}
-.comp-r{display:grid;grid-template-columns:90px repeat(5,1fr);padding:.55rem .8rem;border-bottom:1px solid #0a1520;align-items:center}
+.comp-r{display:grid;grid-template-columns:80px repeat(4,1fr);padding:.55rem .8rem;border-bottom:1px solid #0a1520;align-items:center}
 .comp-r:last-child{border-bottom:none}
 .comp-r:hover{background:#050d1a}
 .mn{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:500;color:#c8d8f0}
@@ -313,45 +312,39 @@ footer{padding:1rem 1.2rem;border-top:1px solid #0a1020;display:flex;justify-con
 
   <!-- COMPARISON -->
   <div class="comp">
-    <div class="comp-inner">
+    <div>
       <div class="comp-h">
         <div class="comp-hc" id="th0">Anyag</div>
-        <div class="comp-hc" id="th1">Nyomtathatóság</div>
         <div class="comp-hc" id="th2">Szilárdság</div>
         <div class="comp-hc" id="th3">Rugalmasság</div>
         <div class="comp-hc" id="th4">Hőállóság</div>
         <div class="comp-hc" id="th5">Kültér/UV</div>
       </div>
       <div class="comp-r"><div class="mn"><span class="md" style="background:#22c55e"></span>PLA</div>
-        <div class="bc"><div class="bt"><div class="bf" style="width:95%;background:#22c55e"></div></div></div>
         <div class="bc"><div class="bt"><div class="bf" style="width:55%;background:#22c55e"></div></div></div>
         <div class="bc"><div class="bt"><div class="bf" style="width:20%;background:#22c55e"></div></div></div>
         <div class="bc"><div class="bt"><div class="bf" style="width:25%;background:#22c55e"></div></div></div>
         <div class="bc"><div class="bt"><div class="bf" style="width:15%;background:#22c55e"></div></div></div>
       </div>
       <div class="comp-r"><div class="mn"><span class="md" style="background:#3b82f6"></span>PETG</div>
-        <div class="bc"><div class="bt"><div class="bf" style="width:75%;background:#3b82f6"></div></div></div>
         <div class="bc"><div class="bt"><div class="bf" style="width:70%;background:#3b82f6"></div></div></div>
         <div class="bc"><div class="bt"><div class="bf" style="width:40%;background:#3b82f6"></div></div></div>
         <div class="bc"><div class="bt"><div class="bf" style="width:55%;background:#3b82f6"></div></div></div>
         <div class="bc"><div class="bt"><div class="bf" style="width:65%;background:#3b82f6"></div></div></div>
       </div>
       <div class="comp-r"><div class="mn"><span class="md" style="background:#6b7280"></span>ABS/ASA</div>
-        <div class="bc"><div class="bt"><div class="bf" style="width:50%;background:#6b7280"></div></div></div>
         <div class="bc"><div class="bt"><div class="bf" style="width:75%;background:#6b7280"></div></div></div>
         <div class="bc"><div class="bt"><div class="bf" style="width:30%;background:#6b7280"></div></div></div>
         <div class="bc"><div class="bt"><div class="bf" style="width:80%;background:#6b7280"></div></div></div>
         <div class="bc"><div class="bt"><div class="bf" style="width:90%;background:#6b7280"></div></div></div>
       </div>
       <div class="comp-r"><div class="mn"><span class="md" style="background:#ef4444"></span>TPU</div>
-        <div class="bc"><div class="bt"><div class="bf" style="width:45%;background:#ef4444"></div></div></div>
         <div class="bc"><div class="bt"><div class="bf" style="width:40%;background:#ef4444"></div></div></div>
         <div class="bc"><div class="bt"><div class="bf" style="width:95%;background:#ef4444"></div></div></div>
         <div class="bc"><div class="bt"><div class="bf" style="width:35%;background:#ef4444"></div></div></div>
         <div class="bc"><div class="bt"><div class="bf" style="width:30%;background:#ef4444"></div></div></div>
       </div>
       <div class="comp-r"><div class="mn"><span class="md" style="background:#ca8a04"></span>Nylon</div>
-        <div class="bc"><div class="bt"><div class="bf" style="width:40%;background:#ca8a04"></div></div></div>
         <div class="bc"><div class="bt"><div class="bf" style="width:90%;background:#ca8a04"></div></div></div>
         <div class="bc"><div class="bt"><div class="bf" style="width:50%;background:#ca8a04"></div></div></div>
         <div class="bc"><div class="bt"><div class="bf" style="width:65%;background:#ca8a04"></div></div></div>
@@ -605,7 +598,7 @@ const T={
     't-rship':'🚚 Szállítás (MPL / GLS)','rv-ship':'+1 800 – 2 500 Ft',
     't-cal-note':'Fix díj, súly és beállítások alapján. Személyes átvétel esetén szállítási díj nem merül fel.',
     't-em-order':'📧 Rendelés emailben →','t-em-q':'Kérdésem van',
-    th0:'Anyag',th1:'Nyomtathatóság',th2:'Szilárdság',th3:'Rugalmasság',th4:'Hőállóság',th5:'Kültér/UV',
+    th0:'Anyag',th2:'Szilárdság',th3:'Rugalmasság',th4:'Hőállóság',th5:'Kültér/UV',
     't-rev-ey':'Vélemények','t-rev-t':'Mit mondanak a vevők',
     tr1:'"Törött alkatrészt nyomtattak nekem, pontosan passzolt. Hamar megérkezett — az ár is meglepett."',trb1:'✓ Visszatérő vevő',
     tr2:'"Kaptam egy videót a nyomtatásról — teljesen lenyűgözött. Ajándékba rendeltem, a barátom imádta!"',trb2:'✓ Ellenőrzött vásárló',
@@ -658,7 +651,7 @@ const T={
     't-rship':'🚚 Shipping (MPL / GLS)','rv-ship':'+1,800 – 2,500 HUF',
     't-cal-note':'Fixed rate based on weight and settings. No shipping fee for local pickup.',
     't-em-order':'📧 Order by email →','t-em-q':'I have a question',
-    th0:'Material',th1:'Printability',th2:'Strength',th3:'Flexibility',th4:'Heat res.',th5:'Outdoor/UV',
+    th0:'Material',th2:'Strength',th3:'Flexibility',th4:'Heat res.',th5:'Outdoor/UV',
     't-rev-ey':'Reviews','t-rev-t':'What customers say',
     tr1:'"They printed a broken part, fit perfectly. Arrived quickly — the price surprised me too."',trb1:'✓ Returning customer',
     tr2:'"I got a video of the printing — loved it. Ordered as a gift, my friend was thrilled!"',trb2:'✓ Verified buyer',

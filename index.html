@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Print3DLab — 3D nyomtatás helyben, profi áron.">
+<title>Print3DLab – 3D nyomtatás helyben, profi áron</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#02040f;color:#c8d8f0;overflow-x:hidden}
+canvas#pcv{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* URGENCY */
+.urg{background:#020b18;border-bottom:1px solid #00b4ff18;padding:6px 1rem;display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap}
+.ui{display:flex;align-items:center;gap:5px;font-size:11px;color:#6b8fa8}
+.ud{width:6px;height:6px;border-radius:50%;background:#00ff88;box-shadow:0 0 5px #00ff88;animation:blink 1.5s infinite;flex-shrink:0}
+.ud.r{background:#ff4466;box-shadow:0 0 5px #ff4466}
+.uv{color:#00b4ff;font-weight:500}
+
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.2rem;border-bottom:1px solid #0e1a33;background:#02040fee;position:sticky;top:0;z-index:100;backdrop-filter:blur(8px)}
+.logo{font-size:16px;font-weight:500;letter-spacing:.1em;color:#fff;text-decoration:none}
+.logo span{color:#00b4ff}
+.logo small{font-size:9px;color:#1e3a5a;letter-spacing:.12em;margin-left:4px;text-transform:uppercase}
+.nav-r{display:flex;align-items:center;gap:8px}
+.nav-a{font-size:12px;padding:7px 14px;border-radius:8px;background:transparent;color:#00b4ff;border:1px solid #00b4ff55;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-block}
+.nav-a:hover{background:#00b4ff18}
+.lang-btn{background:transparent;border:1px solid #00b4ff33;color:#00b4ff;font-size:12px;padding:5px 11px;border-radius:8px;cursor:pointer}
+
+/* BUTTONS */
+.btn{padding:12px 22px;border-radius:10px;background:#00b4ff;color:#000;font-size:14px;font-weight:500;border:none;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-block;text-align:center}
+.btn:hover{background:#33c2ff;transform:translateY(-1px)}
+.btn-o{background:transparent!important;color:#7a9ab8!important;border:1px solid #1a2a3a!important}
+.btn-o:hover{border-color:#00b4ff44!important;color:#00b4ff!important}
+
+/* HERO */
+.hero{padding:3.2rem 1.2rem 2.2rem;text-align:center;position:relative;display:flex;flex-direction:column;align-items:center}
+.hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:500px;height:240px;background:radial-gradient(ellipse,#00b4ff14,transparent 70%);pointer-events:none}
+.tag{display:inline-flex;align-items:center;gap:7px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#00b4ff;border:1px solid #00b4ff33;background:#00b4ff0a;padding:4px 12px;border-radius:999px;margin-bottom:1.2rem}
+.tag-dot{width:5px;height:5px;border-radius:50%;background:#00b4ff;box-shadow:0 0 5px #00b4ff;animation:blink 1.5s infinite}
+.hero h1{font-size:clamp(26px,7vw,46px);font-weight:500;line-height:1.15;color:#fff;margin-bottom:.8rem;max-width:620px}
+.tw{display:block;min-height:1.3em;font-size:clamp(26px,7vw,46px);font-weight:500;color:#00b4ff;text-shadow:0 0 25px #00b4ff28}
+.cur{display:inline-block;width:2px;height:.85em;background:#00b4ff;margin-left:2px;vertical-align:middle;animation:blink .8s infinite}
+.hero-sub{font-size:clamp(14px,3vw,15px);color:#8bafc8;line-height:1.7;max-width:400px;margin:0 auto 1.6rem}
+.btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:1.6rem;width:100%}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(2,1fr);border:1px solid #0e1a33;border-radius:12px;overflow:hidden;width:100%;max-width:600px;background:#030712aa}
+.st{padding:.8rem;text-align:center;border-right:1px solid #0e1a33;border-bottom:1px solid #0e1a33}
+.st:nth-child(2){border-right:none}
+.st:nth-child(3){border-bottom:none}
+.st:nth-child(4){border-right:none;border-bottom:none}
+.stv{font-size:19px;font-weight:500;color:#00b4ff;line-height:1;margin-bottom:2px;text-shadow:0 0 12px #00b4ff44}
+.stl{font-size:10px;color:#4a6a80;letter-spacing:.04em;text-transform:uppercase}
+
+/* LAYOUT */
+.div{height:1px;background:linear-gradient(90deg,transparent,#00b4ff1a,transparent)}
+.sec{padding:2.2rem 1.2rem;max-width:900px;margin:0 auto}
+.bg{background:#030712;padding:2.2rem 1.2rem}
+.bgi{max-width:900px;margin:0 auto}
+.ey{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#00b4ff;text-align:center;margin-bottom:.35rem}
+.st-t{font-size:clamp(19px,4vw,25px);font-weight:500;color:#fff;text-align:center;margin-bottom:.45rem}
+.st-s{font-size:13px;color:#8bafc8;text-align:center;margin-bottom:1.6rem;line-height:1.5}
+
+/* PROBLEM CARDS */
+.gal{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.gc{border-radius:12px;overflow:hidden;border:1px solid #0e1a33;background:#030712;transition:all .3s;text-decoration:none;display:block;position:relative}
+.gc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#00b4ff,transparent);opacity:0;transition:opacity .3s}
+.gc:hover{border-color:#00b4ff44;transform:translateY(-2px)}
+.gc:hover::before{opacity:1}
+.gt{height:100px;display:flex;align-items:center;justify-content:center;background:#04091a;position:relative;overflow:hidden}
+/* SHOPIFY KÉPEK: .gt img { width:100%;height:100%;object-fit:cover;opacity:.85;position:absolute;inset:0; } */
+.gt-f{font-size:32px;position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.gt-l{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#00b4ff;position:absolute;bottom:4px;left:6px;z-index:2;background:#02040fcc;padding:2px 5px;border-radius:4px}
+.gi{padding:.7rem .85rem .85rem}
+.gn{font-size:12px;font-weight:500;color:#fff;margin-bottom:.25rem;line-height:1.3}
+.gd{font-size:11px;color:#8bafc8;line-height:1.5;margin-bottom:.4rem}
+.gpr{font-size:11px;color:#00b4ff}
+.gb{font-size:9px;padding:2px 5px;border-radius:999px;background:#00b4ff11;color:#00b4ff;border:1px solid #00b4ff33;float:right;margin-top:1px}
+.gbr{background:#ff446611;color:#ff4466;border-color:#ff446633}
+.gbg{background:#00ff8811;color:#00ff88;border-color:#00ff8833}
+
+/* MAKERWORLD */
+.mw-box{background:#04091a;border:1px solid #00b4ff22;border-radius:14px;padding:1.4rem;position:relative;overflow:hidden}
+.mw-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#00b4ff,transparent)}
+.mw-badge{display:inline-flex;align-items:center;gap:6px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#00b4ff;border:1px solid #00b4ff33;background:#00b4ff0a;padding:3px 10px;border-radius:999px;margin-bottom:.7rem}
+.mw-title{font-size:clamp(15px,3.5vw,20px);font-weight:500;color:#fff;line-height:1.3;margin-bottom:.5rem}
+.mw-desc{font-size:13px;color:#8bafc8;line-height:1.6;margin-bottom:1.1rem}
+.mw-steps{display:flex;flex-direction:column;gap:7px;margin-bottom:1.2rem}
+.mw-step{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:#8bafc8;line-height:1.4}
+.mw-n{width:20px;height:20px;border-radius:50%;background:#00b4ff18;border:1px solid #00b4ff33;display:flex;align-items:center;justify-content:center;font-size:10px;color:#00b4ff;flex-shrink:0;margin-top:1px}
+
+/* COMPARISON TABLE */
+.comp{background:#04091a;border:1px solid #0e1a33;border-radius:13px;overflow:hidden;margin-bottom:1.4rem}
+.comp-h{display:grid;grid-template-columns:80px repeat(4,1fr);padding:.6rem .8rem;border-bottom:1px solid #0e1a33}
+.comp-hc{font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:#4a6a80;text-align:center;padding:0 2px}
+.comp-hc:first-child{text-align:left}
+.comp-r{display:grid;grid-template-columns:80px repeat(4,1fr);padding:.55rem .8rem;border-bottom:1px solid #0a1520;align-items:center}
+.comp-r:last-child{border-bottom:none}
+.comp-r:hover{background:#050d1a}
+.mn{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:500;color:#c8d8f0}
+.md{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.bc{padding:0 3px}
+.bt{height:5px;background:#0e1a33;border-radius:999px;overflow:hidden}
+.bf{height:100%;border-radius:999px}
+
+/* CALCULATOR */
+.calc-box{background:#04091a;border:1px solid #00b4ff22;border-radius:14px;padding:1.4rem;position:relative;overflow:hidden}
+.calc-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#00b4ff,transparent)}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+.field label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#6b8fa8;display:block;margin-bottom:.45rem}
+.field select,.field input[type=number]{width:100%;background:#02040f;border:1px solid #0e1a33;border-radius:8px;color:#c8d8f0;font-size:14px;padding:8px 11px;outline:none;transition:border-color .2s;-webkit-appearance:none;font-family:inherit}
+.field select:focus,.field input:focus{border-color:#00b4ff55}
+.fh{font-size:11px;color:#2a4a5a;margin-top:.3rem;line-height:1.4}
+.ir{display:flex;align-items:center;gap:9px}
+.isl{flex:1;-webkit-appearance:none;height:4px;border-radius:999px;background:linear-gradient(to right,#00b4ff var(--p,10%),#0e1a33 var(--p,10%));outline:none;cursor:pointer}
+.isl::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;background:#00b4ff;box-shadow:0 0 7px #00b4ff55}
+.isl::-moz-range-thumb{width:17px;height:17px;border-radius:50%;background:#00b4ff;border:none}
+.iv{font-size:13px;font-weight:500;color:#00b4ff;min-width:34px;text-align:right}
+
+/* UPLOAD */
+.upload-zone{border:2px dashed #00b4ff33;border-radius:12px;padding:1.5rem 1rem;text-align:center;background:#02040f;margin-bottom:1rem;cursor:pointer;position:relative;transition:all .2s}
+.upload-zone:hover,.upload-zone.drag{border-color:#00b4ff77;background:#050e1e}
+.upload-file-input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.u-icon{font-size:24px;margin-bottom:.4rem;display:block}
+.u-title{font-size:13px;font-weight:500;color:#fff;margin-bottom:.25rem}
+.u-or{font-size:11px;color:#2a4a5a;margin:.35rem 0}
+.u-btn{display:inline-block;padding:6px 16px;background:#00b4ff;color:#000;border-radius:7px;font-size:12px;font-weight:500}
+.u-fmts{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-top:.6rem}
+.fmt{font-size:10px;padding:2px 7px;border:1px solid #0e1a33;border-radius:999px;color:#4a6a80}
+.u-lim{font-size:11px;color:#2a4a5a;margin-top:.4rem;line-height:1.5}
+.u-ok{display:none;align-items:center;gap:7px;background:#00ff8811;border:1px solid #00ff8833;border-radius:8px;padding:.5rem .8rem;margin-bottom:.8rem;font-size:12px;color:#00ff88}
+
+/* RESULT */
+.res-box{margin-top:1rem;background:#030712;border:1px solid #0e1a33;border-radius:11px;overflow:hidden}
+.rr{display:flex;justify-content:space-between;align-items:center;padding:.55rem .9rem;border-bottom:1px solid #0a1520;font-size:12px}
+.rr:last-child{border-bottom:none}
+.rr.tot{background:#04091a;padding:.75rem .9rem}
+.rr.ship{background:#00b4ff06;border-top:1px solid #00b4ff12}
+.rl{color:#8bafc8}
+.rr.ship .rl,.rr.ship .rv{color:#6b8fa8}
+.rv{color:#c8d8f0;font-weight:500}
+.rv-big{font-size:21px;font-weight:500;color:#00b4ff;text-shadow:0 0 14px #00b4ff44}
+.calc-note{font-size:11px;color:#2a4a5a;margin-top:.6rem;line-height:1.5}
+.act{display:flex;gap:8px;margin-top:.9rem;flex-wrap:wrap}
+.act .btn{flex:1;min-width:130px}
+
+/* REVIEWS */
+.rev-g{display:grid;grid-template-columns:1fr;gap:8px;margin-top:1.5rem}
+.rc{background:#04091a;border:1px solid #0e1a33;border-radius:11px;padding:1rem;transition:border-color .3s}
+.rc:hover{border-color:#00b4ff33}
+.rt{display:flex;align-items:center;gap:8px;margin-bottom:.6rem}
+.rav{width:32px;height:32px;border-radius:50%;background:#00b4ff18;border:1px solid #00b4ff33;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:#00b4ff;flex-shrink:0}
+.rn{font-size:12px;font-weight:500;color:#c8d8f0}
+.rloc{font-size:10px;color:#4a6a80}
+.rs{color:#00b4ff;font-size:11px;margin-bottom:.35rem}
+.rtx{font-size:12px;color:#8bafc8;line-height:1.6}
+.rbg{display:inline-block;font-size:9px;padding:2px 6px;border-radius:999px;background:#00ff8811;color:#00ff88;border:1px solid #00ff8833;margin-top:.6rem}
+
+/* STEPS */
+.steps{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem;margin-top:1.5rem}
+.si{text-align:center;padding:0 .3rem}
+.sc{width:36px;height:36px;border-radius:50%;background:#030712;border:1px solid #00b4ff55;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;font-size:12px;font-weight:500;color:#00b4ff}
+.si h4{font-size:12px;font-weight:500;color:#c8d8f0;margin-bottom:.2rem}
+.si p{font-size:11px;color:#8bafc8;line-height:1.5}
+
+/* CTA */
+.cta-i{max-width:460px;margin:0 auto;text-align:center}
+.cta-i h2{font-size:clamp(20px,5vw,28px);font-weight:500;color:#fff;margin-bottom:.6rem;line-height:1.2}
+.cta-i p{font-size:13px;color:#8bafc8;margin-bottom:1.4rem;line-height:1.7}
+
+/* CONTACT */
+.contact-bar{background:#030712;border-top:1px solid #0e1a33;padding:1.2rem 1.2rem;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.8rem;max-width:900px;margin:0 auto}
+.contact-title{font-size:12px;font-weight:500;color:#4a6a80;text-transform:uppercase;letter-spacing:.08em}
+.contact-links{display:flex;flex-wrap:wrap;gap:1.2rem;align-items:center}
+.contact-link{font-size:13px;color:#00b4ff;text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .2s}
+.contact-link:hover{color:#33c2ff}
+.contact-info{font-size:13px;color:#6b8fa8;display:flex;align-items:center;gap:6px}
+
+/* MOBILE STICKY */
+.mob-cta{display:none;position:fixed;bottom:0;left:0;right:0;background:#02040fee;border-top:1px solid #0e1a33;padding:9px 1.2rem;gap:8px;z-index:200;backdrop-filter:blur(8px)}
+
+footer{padding:1rem 1.2rem;border-top:1px solid #0a1020;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+.fl{font-size:12px;color:#2a4a5a;letter-spacing:.08em}
+.fl span{color:#00b4ff}
+.fc{font-size:11px;color:#1a2a3a}
+
+/* RESPONSIVE */
+@media(min-width:601px){
+  .stats{grid-template-columns:repeat(4,1fr)}
+  .st{border-bottom:none}
+  .st:nth-child(2){border-right:1px solid #0e1a33}
+  .st:last-child{border-right:none}
+  .gal{grid-template-columns:repeat(3,1fr)}
+  .gt{height:120px}
+  .rev-g{grid-template-columns:repeat(3,1fr)}
+  .steps{grid-template-columns:repeat(4,1fr)}
+  footer{padding:1rem 2rem}
+}
+@media(max-width:600px){
+  .ui:last-child{display:none}
+  .mob-cta{display:flex}
+  footer{padding-bottom:5rem}
+  .btns,.act{flex-direction:column;align-items:stretch}
+  .btn{max-width:100%;text-align:center}
+  .calc-grid{grid-template-columns:1fr}
+  .contact-bar{justify-content:flex-start}
+}
+</style>
+</head>
+<body>
+<canvas id="pcv"></canvas>
+<div class="wrap">
+
+<!-- URGENCY -->
+<div class="urg">
+  <div class="ui"><span class="ud"></span><span id="u1">Aktív:</span> <span class="uv" id="ao">3</span> <span id="u2">rendelés</span></div>
+  <div class="ui"><span class="ud r"></span><span id="u3">Szabad slot:</span> <span class="uv">2/8</span></div>
+  <div class="ui"><span class="ud"></span><span id="u4">Válaszidő: gyors</span></div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="#">PRINT<span>3D</span><small>lab</small></a>
+  <div class="nav-r">
+    <button class="lang-btn" id="lang-btn">🌐 EN</button>
+    <a class="nav-a" href="#kalkulator" id="t-nav">Árajánlat →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="tag"><span class="tag-dot"></span><span id="t-tag">Helyi gyártás · Versenyképes ár</span></div>
+  <h1><span id="t-h1">3D nyomtatás —</span><br><span class="tw"><span id="tw"></span><span class="cur"></span></span></h1>
+  <p class="hero-sub" id="t-sub">Egyedi termékek és alkatrészek, kézzel nyomtatva — a régióban, profi áron.</p>
+  <div class="btns">
+    <a class="btn" href="#kalkulator" id="t-b1">Ár kiszámítása →</a>
+    <a class="btn btn-o" href="#segitseg" id="t-b2">Miben segítünk?</a>
+  </div>
+  <div class="stats">
+    <div class="st"><div class="stv" id="c1">0%</div><div class="stl" id="ts1">Egyedi gyártás</div></div>
+    <div class="st"><div class="stv" id="c2">0%</div><div class="stl" id="ts2">Olcsóbb mint online</div></div>
+    <div class="st"><div class="stv">📹</div><div class="stl" id="ts3">Videó rendeléshez</div></div>
+    <div class="st"><div class="stv">📍</div><div class="stl" id="ts4">Helyi átvétel</div></div>
+  </div>
+</section>
+
+<div class="div"></div>
+
+<!-- PROBLEM CARDS -->
+<section class="sec" id="segitseg">
+  <div class="ey" id="t-pc-ey">Miben segítünk</div>
+  <div class="st-t" id="t-pc-t">Valós problémák — kinyomtatva</div>
+  <div class="st-s" id="t-pc-s">Ha valami nem kapható, nem passzol, vagy egyedire van szükséged</div>
+  <div class="gal">
+    <!-- SHOPIFY: href-eket cseréld le termék URL-ekre, .gt-f mellé rakj <img src="SHOPIFY_URL"> -->
+    <a class="gc" href="https://YOUR-SHOP.myshopify.com/products/alkatresz">
+      <div class="gt"><div class="gt-f">🔧</div><div class="gt-l" id="tl1">Javítás</div></div>
+      <div class="gi"><div class="gn" id="tn1">Törött alkatrész — újra működik</div><div class="gd" id="td1">Már nem gyártják? Küldj fotót emailben, kinyomtatjuk — pontosan passzol.</div><div class="gpr">2 000 Ft-tól<span class="gb gbr" id="tb1">csak itt</span></div></div>
+    </a>
+    <a class="gc" href="https://YOUR-SHOP.myshopify.com/products/meretre">
+      <div class="gt"><div class="gt-f">📐</div><div class="gt-l" id="tl2">Méretre</div></div>
+      <div class="gi"><div class="gn" id="tn2">Boltban nincs meg a méret?</div><div class="gd" id="td2">Polctartó, rögzítő, adapter — ha sehol nem kapod meg, mi legyártjuk.</div><div class="gpr">1 500 Ft-tól<span class="gb" id="tb2">rendelésre</span></div></div>
+    </a>
+    <a class="gc" href="https://YOUR-SHOP.myshopify.com/products/egyedi">
+      <div class="gt"><div class="gt-f">🏷️</div><div class="gt-l" id="tl3">Egyedi</div></div>
+      <div class="gi"><div class="gn" id="tn3">Névvel, logóval — csak a tiéd</div><div class="gd" id="td3">Neved, céged logója, egyedi felirat — amit máshol nem tudsz megvenni.</div><div class="gpr">2 500 Ft-tól<span class="gb" id="tb3">egyedi</span></div></div>
+    </a>
+    <a class="gc" href="https://YOUR-SHOP.myshopify.com/products/specialis">
+      <div class="gt"><div class="gt-f">🧩</div><div class="gt-l" id="tl4">Speciális</div></div>
+      <div class="gi"><div class="gn" id="tn4">Semmi nem passzol — mi megoldjuk</div><div class="gd" id="td4">Furcsa méret, régi gép — amit máshol visszautasítanak, mi megcsináljuk.</div><div class="gpr" id="tp4">Egyedi ajánlat<span class="gb gbr" id="tb4">kihívás</span></div></div>
+    </a>
+    <a class="gc" href="https://YOUR-SHOP.myshopify.com/products/prototipus">
+      <div class="gt"><div class="gt-f">⚙️</div><div class="gt-l" id="tl5">Prototípus</div></div>
+      <div class="gi"><div class="gn" id="tn5">Prototípus gyorsan, olcsón</div><div class="gd" id="td5">Terméktervezőknek, feltalálóknak — gyors és pontos, töredék áron.</div><div class="gpr">3 000 Ft-tól<span class="gb" id="tb5">gyors</span></div></div>
+    </a>
+    <a class="gc" href="https://YOUR-SHOP.myshopify.com/products/ajandek">
+      <div class="gt"><div class="gt-f">🎁</div><div class="gt-l" id="tl6">Ajándék</div></div>
+      <div class="gi"><div class="gn" id="tn6">Egyedi ajándék amit sehol nem kapni</div><div class="gd" id="td6">Személyre szabva, kézzel nyomtatva — videóval együtt küldve.</div><div class="gpr">2 900 Ft-tól<span class="gb gbg" id="tb6">népszerű</span></div></div>
+    </a>
+  </div>
+</section>
+
+<!-- MAKERWORLD -->
+<div class="bg">
+  <div class="bgi">
+    <div class="ey" id="t-mw-ey">Nincs ötleted?</div>
+    <div class="st-t" id="t-mw-t" style="margin-bottom:.4rem">Böngészd a MakerWorld modelljeit</div>
+    <div class="st-s" id="t-mw-s">Millió ingyenes 3D modell — ha megtetszik valami, küldd el emailben és kinyomtatjuk.</div>
+    <div class="mw-box">
+      <div class="mw-badge">🌍 <span id="t-mw-b">Millió ingyenes modell</span></div>
+      <div class="mw-title" id="t-mw-tt">Találd meg amit nyomtassunk — mi elkészítjük</div>
+      <div class="mw-desc" id="t-mw-d">A MakerWorld a világ egyik legnagyobb ingyenes 3D modell könyvtára. Keress rá bármire — majd küldd el a linket emailben és mi kinyomtatjuk.</div>
+      <div class="mw-steps">
+        <div class="mw-step"><div class="mw-n">1</div><span id="t-mws1">Megnyitod a MakerWorld-öt és böngészel</span></div>
+        <div class="mw-step"><div class="mw-n">2</div><span id="t-mws2">Megtetszik valami — kimásolod a linket</span></div>
+        <div class="mw-step"><div class="mw-n">3</div><span id="t-mws3">Emailben elkülded nekünk — mi kinyomtatjuk</span></div>
+      </div>
+      <a class="btn" href="https://makerworld.com" target="_blank" id="t-mw-btn">🔍 MakerWorld megnyitása →</a>
+    </div>
+  </div>
+</div>
+
+<!-- CALCULATOR -->
+<section class="sec" id="kalkulator">
+  <div class="ey" id="t-cal-ey">Árkalkulátor</div>
+  <div class="st-t" id="t-cal-t">Számold ki az árat</div>
+  <div class="st-s" id="t-cal-s">Válaszd ki az anyagot, színt és kitöltést — az ár azonnal frissül.</div>
+
+  <!-- COMPARISON -->
+  <div class="comp">
+    <div>
+      <div class="comp-h">
+        <div class="comp-hc" id="th0">Anyag</div>
+        <div class="comp-hc" id="th2">Szilárdság</div>
+        <div class="comp-hc" id="th3">Rugalmasság</div>
+        <div class="comp-hc" id="th4">Hőállóság</div>
+        <div class="comp-hc" id="th5">Kültér/UV</div>
+      </div>
+      <div class="comp-r"><div class="mn"><span class="md" style="background:#22c55e"></span>PLA</div>
+        <div class="bc"><div class="bt"><div class="bf" style="width:55%;background:#22c55e"></div></div></div>
+        <div class="bc"><div class="bt"><div class="bf" style="width:20%;background:#22c55e"></div></div></div>
+        <div class="bc"><div class="bt"><div class="bf" style="width:25%;background:#22c55e"></div></div></div>
+        <div class="bc"><div class="bt"><div class="bf" style="width:15%;background:#22c55e"></div></div></div>
+      </div>
+      <div class="comp-r"><div class="mn"><span class="md" style="background:#3b82f6"></span>PETG</div>
+        <div class="bc"><div class="bt"><div class="bf" style="width:70%;background:#3b82f6"></div></div></div>
+        <div class="bc"><div class="bt"><div class="bf" style="width:40%;background:#3b82f6"></div></div></div>
+        <div class="bc"><div class="bt"><div class="bf" style="width:55%;background:#3b82f6"></div></div></div>
+        <div class="bc"><div class="bt"><div class="bf" style="width:65%;background:#3b82f6"></div></div></div>
+      </div>
+      <div class="comp-r"><div class="mn"><span class="md" style="background:#6b7280"></span>ABS/ASA</div>
+        <div class="bc"><div class="bt"><div class="bf" style="width:75%;background:#6b7280"></div></div></div>
+        <div class="bc"><div class="bt"><div class="bf" style="width:30%;background:#6b7280"></div></div></div>
+        <div class="bc"><div class="bt"><div class="bf" style="width:80%;background:#6b7280"></div></div></div>
+        <div class="bc"><div class="bt"><div class="bf" style="width:90%;background:#6b7280"></div></div></div>
+      </div>
+      <div class="comp-r"><div class="mn"><span class="md" style="background:#ef4444"></span>TPU</div>
+        <div class="bc"><div class="bt"><div class="bf" style="width:40%;background:#ef4444"></div></div></div>
+        <div class="bc"><div class="bt"><div class="bf" style="width:95%;background:#ef4444"></div></div></div>
+        <div class="bc"><div class="bt"><div class="bf" style="width:35%;background:#ef4444"></div></div></div>
+        <div class="bc"><div class="bt"><div class="bf" style="width:30%;background:#ef4444"></div></div></div>
+      </div>
+      <div class="comp-r"><div class="mn"><span class="md" style="background:#ca8a04"></span>Nylon</div>
+        <div class="bc"><div class="bt"><div class="bf" style="width:90%;background:#ca8a04"></div></div></div>
+        <div class="bc"><div class="bt"><div class="bf" style="width:50%;background:#ca8a04"></div></div></div>
+        <div class="bc"><div class="bt"><div class="bf" style="width:65%;background:#ca8a04"></div></div></div>
+        <div class="bc"><div class="bt"><div class="bf" style="width:40%;background:#ca8a04"></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="calc-box">
+    <!-- UPLOAD -->
+    <div class="upload-zone" id="upload-zone">
+      <input type="file" class="upload-file-input" id="file-input" accept=".stl,.obj,.3mf,.step,.zip" onchange="handleFile(this)">
+      <span class="u-icon">☁️</span>
+      <div class="u-title" id="t-u-title">Húzd ide a fájlt vagy kattints</div>
+      <div class="u-or" id="t-u-or">— VAGY —</div>
+      <div class="u-btn" id="t-u-btn">Fájl hozzáadása</div>
+      <div class="u-fmts"><span class="fmt">STL</span><span class="fmt">OBJ</span><span class="fmt">3MF</span><span class="fmt">STEP</span><span class="fmt">ZIP</span></div>
+      <div class="u-lim" id="t-u-lim">Max. <strong>200 MB</strong> · Max. méret: <strong>350 × 350 × 345 mm</strong></div>
+    </div>
+    <div class="u-ok" id="u-ok">✅ <span id="u-fn">fájl feltöltve</span></div>
+
+    <div class="calc-grid">
+      <div class="field">
+        <label id="t-lmat">Alapanyag</label>
+        <select id="sel-mat" onchange="updateColors();calc()">
+          <option value="pla">PLA</option>
+          <option value="petg">PETG</option>
+          <option value="tpu">TPU</option>
+          <option value="abs">ABS / ASA</option>
+          <option value="nylon">Nylon</option>
+        </select>
+        <div class="fh" id="mat-hint">Általános, dekor, prototípus — legjobb ár</div>
+      </div>
+      <div class="field">
+        <label id="t-lcol">Szín</label>
+        <select id="sel-col" onchange="calc()"></select>
+        <div class="fh" id="col-hint"></div>
+      </div>
+      <div class="field">
+        <label id="t-lw">Becsült súly (gramm)</label>
+        <input type="number" id="inp-w" value="30" min="1" max="1000" oninput="calc()">
+        <div class="fh" id="t-wh">Kis tárgy: 10–50g · Közepes: 50–150g · Nagy: 150g+</div>
+      </div>
+      <div class="field">
+        <label id="t-li">Kitöltés (infill)</label>
+        <div class="ir">
+          <input class="isl" type="range" id="inp-i" min="10" max="100" step="5" value="20" oninput="updI();calc()" style="--p:10%">
+          <span class="iv" id="i-disp">20%</span>
+        </div>
+        <div class="fh" id="t-ih">Dekor: 10–20% · Funkcionális: 30–50% · Erős: 60–100%</div>
+      </div>
+    </div>
+
+    <div class="res-box">
+      <div class="rr"><span class="rl" id="t-r1">Alapanyag</span><span class="rv" id="rv1">—</span></div>
+      <div class="rr"><span class="rl" id="t-r2">Infill korrekció</span><span class="rv" id="rv2">—</span></div>
+      <div class="rr tot">
+        <span class="rl" style="font-size:13px;font-weight:500;color:#c8d8f0" id="t-rtot">Ár (szállítás nélkül)</span>
+        <span class="rv-big" id="rv-tot">—</span>
+      </div>
+      <div class="rr ship">
+        <span class="rl" id="t-rship">🚚 Szállítás (MPL / GLS)</span>
+        <span class="rv" id="rv-ship">+1 800 – 2 500 Ft</span>
+      </div>
+    </div>
+    <div class="calc-note" id="t-cal-note">Fix díj, súly és beállítások alapján. Személyes átvétel esetén szállítási díj nem merül fel.</div>
+    <div class="act">
+      <a class="btn" href="mailto:hello@print3dlab.hu" id="t-em-order">📧 Rendelés emailben →</a>
+      <a class="btn btn-o" href="mailto:hello@print3dlab.hu" id="t-em-q">Kérdésem van</a>
+    </div>
+  </div>
+</section>
+
+<div class="div"></div>
+
+<!-- REVIEWS -->
+<div class="bg">
+  <div class="bgi">
+    <div class="ey" id="t-rev-ey">Vélemények</div>
+    <div class="st-t" id="t-rev-t">Mit mondanak a vevők</div>
+    <div class="rev-g">
+      <div class="rc"><div class="rt"><div class="rav">KM</div><div><div class="rn">Kovács Márton</div><div class="rloc">Miskolc</div></div></div><div class="rs">★★★★★</div><div class="rtx" id="tr1">"Törött alkatrészt nyomtattak nekem, pontosan passzolt. Hamar megérkezett — az ár is meglepett."</div><div class="rbg" id="trb1">✓ Visszatérő vevő</div></div>
+      <div class="rc"><div class="rt"><div class="rav">SV</div><div><div class="rn">Szabó Vivien</div><div class="rloc">Eger</div></div></div><div class="rs">★★★★★</div><div class="rtx" id="tr2">"Kaptam egy videót a nyomtatásról — teljesen lenyűgözött. Ajándékba rendeltem, a barátom imádta!"</div><div class="rbg" id="trb2">✓ Ellenőrzött vásárló</div></div>
+      <div class="rc"><div class="rt"><div class="rav">TZ</div><div><div class="rn">Tóth Zoltán</div><div class="rloc">Miskolc</div></div></div><div class="rs">★★★★★</div><div class="rtx" id="tr3">"Prototípust készíttettem. Gyors, precíz, és az ár töredéke volt annak, amit máshol kértek."</div><div class="rbg" id="trb3">✓ Üzleti megrendelő</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- STEPS -->
+<section class="sec" id="folyamat">
+  <div class="ey" id="t-st-ey">Hogyan működik?</div>
+  <div class="st-t" id="t-st-t">4 lépés, és kész</div>
+  <div class="steps">
+    <div class="si"><div class="sc">01</div><h4 id="ts-1">Írj emailben</h4><p id="tsp1">Leírást, fotót vagy STL fájlt küldesz — bármi elég a kezdéshez.</p></div>
+    <div class="si"><div class="sc">02</div><h4 id="ts-2">Árajánlat</h4><p id="tsp2">Pontos árat, anyagot és szállítási időt küldünk vissza.</p></div>
+    <div class="si"><div class="sc">03</div><h4 id="ts-3">Nyomtatás + videó</h4><p id="tsp3">Elkészítjük és videót küldünk a folyamatról.</p></div>
+    <div class="si"><div class="sc">04</div><h4 id="ts-4">Átvétel vagy szállítás</h4><p id="tsp4">Személyes átvétel a régióban, vagy MPL / GLS futárral.</p></div>
+  </div>
+</section>
+
+<div class="div"></div>
+
+<!-- CTA -->
+<div class="bg" style="padding:3rem 1.2rem">
+  <div class="cta-i">
+    <div class="ey" id="t-cta-ey">Kezdjük el</div>
+    <h2 id="t-cta-h">Az ötleted már félúton van</h2>
+    <p id="t-cta-p">Írj nekünk emailben — visszajelzünk amint tudjuk.</p>
+    <div class="btns" style="justify-content:center">
+      <a class="btn" href="mailto:hello@print3dlab.hu" id="t-cta1">📧 Írj nekünk emailben →</a>
+      <a class="btn btn-o" href="#kalkulator" id="t-cta2">Ár kiszámítása</a>
+    </div>
+  </div>
+</div>
+
+<!-- CONTACT BAR -->
+<div style="background:#030712;border-top:1px solid #0e1a33;padding:1.2rem">
+  <div class="contact-bar">
+    <div class="contact-title" id="t-contact">Elérhetőség</div>
+    <div class="contact-links">
+      <a class="contact-link" href="mailto:hello@print3dlab.hu" id="t-c-email">📧 hello@print3dlab.hu</a>
+      <span class="contact-info" id="t-c-region">📍 Miskolc és környéke</span>
+      <span class="contact-info" id="t-c-pickup">🤝 Személyes átvétel elérhető</span>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="fl">PRINT<span>3D</span>lab</div>
+  <div class="fc" id="t-foot">© 2026 · Helyi gyártás, valódi minőség</div>
+</footer>
+</div>
+
+<!-- MOBILE STICKY -->
+<div class="mob-cta">
+  <a class="btn" style="flex:1" href="#kalkulator" id="t-m1">Ár kiszámítása →</a>
+  <a class="btn btn-o" style="flex:1" href="mailto:hello@print3dlab.hu" id="t-m2">Email</a>
+</div>
+
+<script>
+// PARTICLES
+const cv=document.getElementById('pcv'),cx=cv.getContext('2d');
+let W,H,ps=[];
+function rsz(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight;}
+function iPs(){ps=[];const n=Math.floor(W*H/13000);for(let i=0;i<n;i++)ps.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.3+.4,a:Math.random()*Math.PI*2});}
+function drw(){cx.clearRect(0,0,W,H);for(let i=0;i<ps.length;i++){const p=ps[i];p.x+=p.vx;p.y+=p.vy;p.a+=.005;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;const al=(Math.sin(p.a)*.3+.4).toFixed(2);cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);cx.fillStyle='rgba(0,180,255,'+al+')';cx.fill();for(let j=i+1;j<ps.length;j++){const q=ps[j],dx=p.x-q.x,dy=p.y-q.y,d=Math.sqrt(dx*dx+dy*dy);if(d<100){cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(q.x,q.y);cx.strokeStyle='rgba(0,180,255,'+((1-d/100)*.09).toFixed(3)+')';cx.lineWidth=.5;cx.stroke();}}}requestAnimationFrame(drw);}
+rsz();iPs();drw();window.addEventListener('resize',()=>{rsz();iPs();});
+
+// TYPEWRITER
+const phrHU=['profi szinten.','nem profi áron.','rétegről rétegre.','neked csinálva.'];
+const phrEN=['at a pro level.','not at pro prices.','layer by layer.','made for you.'];
+let lang='hu',pi=0,ci=0,del=false,twT=null;
+const twEl=document.getElementById('tw');
+function startTw(){if(twT)clearTimeout(twT);ci=0;del=false;twEl.textContent='';tick();}
+function tick(){const phr=lang==='hu'?phrHU:phrEN;const ph=phr[pi%phr.length];if(!del){twEl.textContent=ph.slice(0,ci+1);ci++;if(ci===ph.length){del=true;twT=setTimeout(tick,1800);}else twT=setTimeout(tick,80);}else{twEl.textContent=ph.slice(0,ci-1);ci--;if(ci===0){del=false;pi++;twT=setTimeout(tick,300);}else twT=setTimeout(tick,40);}}
+setTimeout(startTw,400);
+
+// COUNTER
+function animCount(el,target,prefix,suffix){let s=null;(function step(ts){if(!s)s=ts;const p=Math.min((ts-s)/1000,1);el.textContent=(prefix||'')+Math.round(p*target)+(suffix||'');if(p<1)requestAnimationFrame(step);})(performance.now());}
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){const id=e.target.id;if(id==='c1')animCount(e.target,100,'','%');else if(id==='c2')animCount(e.target,30,'–','%');obs.unobserve(e.target);}});},{threshold:.5});
+['c1','c2'].forEach(id=>{const el=document.getElementById(id);if(el)obs.observe(el);});
+
+// CALCULATOR DATA
+const mats={
+  pla:  {g:120,hint:{hu:'Általános, dekor, prototípus — legjobb ár',en:'General, decor, prototype — best price'}},
+  petg: {g:135,hint:{hu:'Tartós, funkcionális, nedvességálló',en:'Durable, functional, moisture resistant'}},
+  tpu:  {g:155,hint:{hu:'Rugalmas, ütésálló — tokok, talpbetétek',en:'Flexible, impact-resistant — cases, insoles'}},
+  abs:  {g:140,hint:{hu:'Kültéri, UV- és hőálló',en:'Outdoor, UV and heat resistant'}},
+  nylon:{g:165,hint:{hu:'Műszaki, nagy terhelés — fogaskerekek',en:'Technical, high load — gears, bearings'}},
+};
+const colorMap={
+  pla:{hu:[{v:'feher',n:'Fehér'},{v:'fekete',n:'Fekete'},{v:'szurke',n:'Szürke'},{v:'piros',n:'Piros'},{v:'kek',n:'Kék'},{v:'zold',n:'Zöld'},{v:'sarga',n:'Sárga'},{v:'narancs',n:'Narancssárga'},{v:'lila',n:'Lila'}],en:[{v:'feher',n:'White'},{v:'fekete',n:'Black'},{v:'szurke',n:'Grey'},{v:'piros',n:'Red'},{v:'kek',n:'Blue'},{v:'zold',n:'Green'},{v:'sarga',n:'Yellow'},{v:'narancs',n:'Orange'},{v:'lila',n:'Purple'}]},
+  petg:{hu:[{v:'feher',n:'Fehér (matt)'},{v:'fekete',n:'Fekete'},{v:'atlatszo',n:'Átlátszó'},{v:'kek',n:'Kék'},{v:'piros',n:'Piros'}],en:[{v:'feher',n:'White (matte)'},{v:'fekete',n:'Black'},{v:'atlatszo',n:'Transparent'},{v:'kek',n:'Blue'},{v:'piros',n:'Red'}]},
+  tpu:{hu:[{v:'fekete',n:'Fekete'},{v:'feher',n:'Fehér'},{v:'piros',n:'Piros'}],en:[{v:'fekete',n:'Black'},{v:'feher',n:'White'},{v:'piros',n:'Red'}]},
+  abs:{hu:[{v:'fekete',n:'Fekete'},{v:'feher',n:'Fehér'},{v:'szurke',n:'Szürke'}],en:[{v:'fekete',n:'Black'},{v:'feher',n:'White'},{v:'szurke',n:'Grey'}]},
+  nylon:{hu:[{v:'feher',n:'Fehér (natúr)'},{v:'fekete',n:'Fekete'}],en:[{v:'feher',n:'White (natural)'},{v:'fekete',n:'Black'}]}
+};
+
+function updateColors(){
+  const mat=document.getElementById('sel-mat').value;
+  const sel=document.getElementById('sel-col');
+  const cols=colorMap[mat][lang];
+  sel.innerHTML='';
+  cols.forEach(c=>{const o=document.createElement('option');o.value=c.v;o.textContent=c.n;sel.appendChild(o);});
+  document.getElementById('mat-hint').textContent=mats[mat].hint[lang];
+  document.getElementById('col-hint').textContent=lang==='hu'?cols.length+' elérhető szín':cols.length+' available colors';
+}
+function updI(){const v=document.getElementById('inp-i').value;document.getElementById('i-disp').textContent=v+'%';document.getElementById('inp-i').style.setProperty('--p',v+'%');}
+function calc(){
+  const mat=document.getElementById('sel-mat').value;
+  const w=parseFloat(document.getElementById('inp-w').value)||0;
+  const inf=parseInt(document.getElementById('inp-i').value);
+  const base=w*mats[mat].g;
+  const mult=0.55+(inf/100)*0.9;
+  const adj=base*mult;
+  const total=Math.max(800,Math.round(adj/50)*50);
+  const fmt=n=>n.toLocaleString('hu')+' Ft';
+  document.getElementById('rv1').textContent=fmt(Math.round(base));
+  document.getElementById('rv2').textContent=(mult>=1?'+':'')+fmt(Math.round(adj-base));
+  document.getElementById('rv-tot').textContent=fmt(total);
+}
+
+// FILE UPLOAD
+function handleFile(input){
+  const f=input.files[0];if(!f)return;
+  const ok=document.getElementById('u-ok');ok.style.display='flex';
+  document.getElementById('u-fn').textContent=f.name+' ('+(f.size/1024/1024).toFixed(2)+' MB)';
+  document.getElementById('upload-zone').style.borderColor='#00ff8866';
+}
+const uz=document.getElementById('upload-zone');
+uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('drag');});
+uz.addEventListener('dragleave',()=>uz.classList.remove('drag'));
+uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('drag');const f=e.dataTransfer.files[0];if(f){document.getElementById('u-ok').style.display='flex';document.getElementById('u-fn').textContent=f.name;uz.style.borderColor='#00ff8866';}});
+
+// LIVE COUNTER
+setInterval(()=>{if(Math.random()>.7)document.getElementById('ao').textContent=Math.floor(Math.random()*3)+2;},8000);
+
+// LANGUAGE
+const T={
+  hu:{
+    'lang-btn':'🌐 EN',
+    u1:'Aktív:',u2:'rendelés',u3:'Szabad slot:',u4:'Válaszidő: gyors',
+    't-nav':'Árajánlat →','t-tag':'Helyi gyártás · Versenyképes ár','t-h1':'3D nyomtatás —',
+    't-sub':'Egyedi termékek és alkatrészek, kézzel nyomtatva — a régióban, profi áron.',
+    't-b1':'Ár kiszámítása →','t-b2':'Miben segítünk?',
+    ts1:'Egyedi gyártás',ts2:'Olcsóbb mint online',ts3:'Videó rendeléshez',ts4:'Helyi átvétel',
+    't-pc-ey':'Miben segítünk','t-pc-t':'Valós problémák — kinyomtatva',
+    't-pc-s':'Ha valami nem kapható, nem passzol, vagy egyedire van szükséged',
+    tl1:'Javítás',tn1:'Törött alkatrész — újra működik',td1:'Már nem gyártják? Küldj fotót emailben, kinyomtatjuk — pontosan passzol.',tb1:'csak itt',
+    tl2:'Méretre',tn2:'Boltban nincs meg a méret?',td2:'Polctartó, rögzítő, adapter — ha sehol nem kapod meg, mi legyártjuk.',tb2:'rendelésre',
+    tl3:'Egyedi',tn3:'Névvel, logóval — csak a tiéd',td3:'Neved, céged logója, egyedi felirat — amit máshol nem tudsz megvenni.',tb3:'egyedi',
+    tl4:'Speciális',tn4:'Semmi nem passzol — mi megoldjuk',td4:'Furcsa méret, régi gép — amit máshol visszautasítanak, mi megcsináljuk.',tp4:'Egyedi ajánlat',tb4:'kihívás',
+    tl5:'Prototípus',tn5:'Prototípus gyorsan, olcsón',td5:'Terméktervezőknek, feltalálóknak — gyors és pontos, töredék áron.',tb5:'gyors',
+    tl6:'Ajándék',tn6:'Egyedi ajándék amit sehol nem kapni',td6:'Személyre szabva, kézzel nyomtatva — videóval együtt küldve.',tb6:'népszerű',
+    't-mw-ey':'Nincs ötleted?','t-mw-t':'Böngészd a MakerWorld modelljeit',
+    't-mw-s':'Millió ingyenes 3D modell — ha megtetszik valami, küldd el emailben és kinyomtatjuk.',
+    't-mw-b':'Millió ingyenes modell','t-mw-tt':'Találd meg amit nyomtassunk — mi elkészítjük',
+    't-mw-d':'A MakerWorld a világ egyik legnagyobb ingyenes 3D modell könyvtára. Keress rá bármire — majd küldd el a linket emailben és mi kinyomtatjuk.',
+    't-mws1':'Megnyitod a MakerWorld-öt és böngészel',
+    't-mws2':'Megtetszik valami — kimásolod a linket',
+    't-mws3':'Emailben elkülded nekünk — mi kinyomtatjuk',
+    't-mw-btn':'🔍 MakerWorld megnyitása →',
+    't-cal-ey':'Árkalkulátor','t-cal-t':'Számold ki az árat',
+    't-cal-s':'Válaszd ki az anyagot, színt és kitöltést — az ár azonnal frissül.',
+    't-u-title':'Húzd ide a fájlt vagy kattints','t-u-or':'— VAGY —','t-u-btn':'Fájl hozzáadása',
+    't-u-lim':'Max. <strong>200 MB</strong> · Max. méret: <strong>350 × 350 × 345 mm</strong>',
+    't-lmat':'Alapanyag','t-lcol':'Szín','t-lw':'Becsült súly (gramm)','t-li':'Kitöltés (infill)',
+    't-wh':'Kis tárgy: 10–50g · Közepes: 50–150g · Nagy: 150g+',
+    't-ih':'Dekor: 10–20% · Funkcionális: 30–50% · Erős: 60–100%',
+    't-r1':'Alapanyag','t-r2':'Infill korrekció','t-rtot':'Ár (szállítás nélkül)',
+    't-rship':'🚚 Szállítás (MPL / GLS)','rv-ship':'+1 800 – 2 500 Ft',
+    't-cal-note':'Fix díj, súly és beállítások alapján. Személyes átvétel esetén szállítási díj nem merül fel.',
+    't-em-order':'📧 Rendelés emailben →','t-em-q':'Kérdésem van',
+    th0:'Anyag',th2:'Szilárdság',th3:'Rugalmasság',th4:'Hőállóság',th5:'Kültér/UV',
+    't-rev-ey':'Vélemények','t-rev-t':'Mit mondanak a vevők',
+    tr1:'"Törött alkatrészt nyomtattak nekem, pontosan passzolt. Hamar megérkezett — az ár is meglepett."',trb1:'✓ Visszatérő vevő',
+    tr2:'"Kaptam egy videót a nyomtatásról — teljesen lenyűgözött. Ajándékba rendeltem, a barátom imádta!"',trb2:'✓ Ellenőrzött vásárló',
+    tr3:'"Prototípust készíttettem. Gyors, precíz, és az ár töredéke volt annak, amit máshol kértek."',trb3:'✓ Üzleti megrendelő',
+    't-st-ey':'Hogyan működik?','t-st-t':'4 lépés, és kész',
+    'ts-1':'Írj emailben',tsp1:'Leírást, fotót vagy STL fájlt küldesz — bármi elég a kezdéshez.',
+    'ts-2':'Árajánlat',tsp2:'Pontos árat, anyagot és szállítási időt küldünk vissza.',
+    'ts-3':'Nyomtatás + videó',tsp3:'Elkészítjük és videót küldünk a folyamatról.',
+    'ts-4':'Átvétel vagy szállítás',tsp4:'Személyes átvétel a régióban, vagy MPL / GLS futárral.',
+    't-cta-ey':'Kezdjük el','t-cta-h':'Az ötleted már félúton van',
+    't-cta-p':'Írj nekünk emailben — visszajelzünk amint tudjuk.',
+    't-cta1':'📧 Írj nekünk emailben →','t-cta2':'Ár kiszámítása',
+    't-contact':'Elérhetőség','t-c-email':'📧 hello@print3dlab.hu',
+    't-c-region':'📍 Miskolc és környéke','t-c-pickup':'🤝 Személyes átvétel elérhető',
+    't-foot':'© 2026 · Helyi gyártás, valódi minőség',
+    't-m1':'Ár kiszámítása →','t-m2':'Email',
+    mat_sel:['PLA','PETG','TPU','ABS / ASA','Nylon']
+  },
+  en:{
+    'lang-btn':'🌐 HU',
+    u1:'Active:',u2:'orders',u3:'Free slot:',u4:'Response: fast',
+    't-nav':'Get quote →','t-tag':'Local production · Competitive pricing','t-h1':'3D printing —',
+    't-sub':'Custom products and parts, handprinted locally — at competitive prices.',
+    't-b1':'Calculate price →','t-b2':'How we help',
+    ts1:'Custom made',ts2:'Cheaper than online',ts3:'Video per order',ts4:'Local pickup',
+    't-pc-ey':'How we help','t-pc-t':'Real problems — printed',
+    't-pc-s':'When something is unavailable, wrong size, or needs to be uniquely yours',
+    tl1:'Repair',tn1:'Broken part — working again',td1:"No longer manufactured? Email us a photo, we print it — fits perfectly.",tb1:'only here',
+    tl2:'Custom size',tn2:"Can't find the right size?",td2:"Shelf bracket, mount, adapter — if you can't find it, we make it.",tb2:'on order',
+    tl3:'Unique',tn3:'With your name, logo — yours only',td3:"Your name, company logo — something you can't buy anywhere else.",tb3:'custom',
+    tl4:'Special',tn4:'Nothing fits — we solve it',td4:"Odd size, old machine — what others refuse, we make happen.",tp4:'Custom quote',tb4:'challenge',
+    tl5:'Prototype',tn5:'Prototype fast and affordable',td5:'For product designers and inventors — fast, precise, fraction of the cost.',tb5:'fast',
+    tl6:'Gift',tn6:"A unique gift you can't buy anywhere",td6:'Personalized, handprinted — sent with a video.',tb6:'popular',
+    't-mw-ey':'No idea what to print?','t-mw-t':'Browse MakerWorld models',
+    't-mw-s':"Millions of free 3D models — find something you like, email us the link and we'll print it.",
+    't-mw-b':'Millions of free models','t-mw-tt':"Find what to print — we'll make it",
+    't-mw-d':"MakerWorld is one of the world's largest free 3D model libraries. Search for anything — then email us the link and we'll print it for you.",
+    't-mws1':'Open MakerWorld and browse freely',
+    't-mws2':'Find something you like — copy the link',
+    't-mws3':"Email us the link — we'll print it",
+    't-mw-btn':'🔍 Open MakerWorld →',
+    't-cal-ey':'Price calculator','t-cal-t':'Calculate the price',
+    't-cal-s':'Choose material, color and infill — price updates instantly.',
+    't-u-title':'Drag your file here or click','t-u-or':'— OR —','t-u-btn':'Add file',
+    't-u-lim':'Max. <strong>200 MB</strong> · Max. dimensions: <strong>350 × 350 × 345 mm</strong>',
+    't-lmat':'Material','t-lcol':'Color','t-lw':'Estimated weight (grams)','t-li':'Infill density',
+    't-wh':'Small: 10–50g · Medium: 50–150g · Large: 150g+',
+    't-ih':'Decorative: 10–20% · Functional: 30–50% · Strong: 60–100%',
+    't-r1':'Material cost','t-r2':'Infill adjustment','t-rtot':'Price (excl. shipping)',
+    't-rship':'🚚 Shipping (MPL / GLS)','rv-ship':'+1,800 – 2,500 HUF',
+    't-cal-note':'Fixed rate based on weight and settings. No shipping fee for local pickup.',
+    't-em-order':'📧 Order by email →','t-em-q':'I have a question',
+    th0:'Material',th2:'Strength',th3:'Flexibility',th4:'Heat res.',th5:'Outdoor/UV',
+    't-rev-ey':'Reviews','t-rev-t':'What customers say',
+    tr1:'"They printed a broken part, fit perfectly. Arrived quickly — the price surprised me too."',trb1:'✓ Returning customer',
+    tr2:'"I got a video of the printing — loved it. Ordered as a gift, my friend was thrilled!"',trb2:'✓ Verified buyer',
+    tr3:'"Had a prototype made. Fast, precise, a fraction of what others would charge."',trb3:'✓ Business customer',
+    't-st-ey':'How it works','t-st-t':'4 steps, done',
+    'ts-1':'Write to us',tsp1:'Send a description, photo or STL — anything works to get started.',
+    'ts-2':'Quote',tsp2:'Exact price, material and delivery time.',
+    'ts-3':'Print + video',tsp3:'We make your product and send a video.',
+    'ts-4':'Pickup or delivery',tsp4:'Local pickup or MPL / GLS courier.',
+    't-cta-ey':"Let's start",'t-cta-h':'Your idea is halfway there',
+    't-cta-p':"Write to us by email — we'll get back to you as soon as possible.",
+    't-cta1':'📧 Write to us by email →','t-cta2':'Calculate price',
+    't-contact':'Contact','t-c-email':'📧 hello@print3dlab.hu',
+    't-c-region':'📍 Miskolc and surroundings','t-c-pickup':'🤝 Local pickup available',
+    't-foot':'© 2026 · Local production, real quality',
+    't-m1':'Calculate price →','t-m2':'Email',
+    mat_sel:['PLA','PETG','TPU','ABS / ASA','Nylon']
+  }
+};
+
+function setLang(l){
+  lang=l;
+  const d=T[l];
+  Object.keys(d).forEach(id=>{
+    if(id==='mat_sel')return;
+    const el=document.getElementById(id);
+    if(el)el.innerHTML=d[id];
+  });
+  const sel=document.getElementById('sel-mat');
+  d.mat_sel.forEach((n,i)=>{if(sel.options[i])sel.options[i].text=n;});
+  updateColors();calc();
+}
+
+document.getElementById('lang-btn').addEventListener('click',()=>setLang(lang==='hu'?'en':'hu'));
+updateColors();updI();calc();
+</script>
+</body>
+</html>

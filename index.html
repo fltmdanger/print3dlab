@@ -96,10 +96,10 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:.85rem
 
 /* ── COMPARISON TABLE — 1–5 skála ── */
 .comp{background:#04091a;border:1px solid #0e1a33;border-radius:13px;overflow:hidden;margin-bottom:1.4rem}
-.comp-h{display:grid;grid-template-columns:80px repeat(4,1fr);padding:.55rem .9rem;border-bottom:1px solid #0e1a33;gap:4px}
-.comp-hc{font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:#4a6a80;text-align:center}
+.comp-h{display:grid;grid-template-columns:68px repeat(4,1fr);padding:.5rem .7rem;border-bottom:1px solid #0e1a33;gap:3px}
+.comp-hc{font-size:8px;letter-spacing:.03em;text-transform:uppercase;color:#4a6a80;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .comp-hc:first-child{text-align:left}
-.comp-r{display:grid;grid-template-columns:80px repeat(4,1fr);padding:.55rem .9rem;border-bottom:1px solid #0a1520;align-items:center;gap:4px}
+.comp-r{display:grid;grid-template-columns:68px repeat(4,1fr);padding:.5rem .7rem;border-bottom:1px solid #0a1520;align-items:center;gap:3px}
 .comp-r:last-child{border-bottom:none}
 .comp-r:hover{background:#050d1a}
 .mn{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:#c8d8f0}
@@ -180,6 +180,11 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:.85rem
 .form-success .ok-icon{font-size:40px;margin-bottom:.8rem;display:block}
 .form-success h3{font-size:17px;font-weight:500;color:#fff;margin-bottom:.4rem}
 .form-success p{font-size:13px;color:#8bafc8;line-height:1.6}
+/* SHIPPING OPTIONS */
+.ship-opt{cursor:pointer;display:block}
+.ship-opt-inner{display:flex;flex-direction:column;align-items:center;gap:3px;padding:.65rem .4rem;background:#02040f;border:1px solid #0e1a33;border-radius:10px;font-size:11px;color:#8bafc8;text-align:center;transition:all .2s;line-height:1.3}
+.ship-opt-inner:hover{border-color:#00b4ff44;color:#c8d8f0}
+.ship-opt-inner.selected{border-color:#00b4ff;background:#00b4ff0d;color:#fff}
 
 /* REVIEWS */
 .rev-g{display:grid;grid-template-columns:1fr;gap:8px;margin-top:1.5rem}
@@ -352,10 +357,10 @@ footer{padding:1rem 1.2rem;border-top:1px solid #0a1020;display:flex;justify-con
   <div class="comp">
     <div class="comp-h">
       <div class="comp-hc" id="th0">Anyag</div>
-      <div class="comp-hc" id="th2">Szilárdság</div>
-      <div class="comp-hc" id="th3">Rugalmasság</div>
-      <div class="comp-hc" id="th4">Hőállóság</div>
-      <div class="comp-hc" id="th5">Kültér/UV</div>
+      <div class="comp-hc" id="th2">Szilárd</div>
+      <div class="comp-hc" id="th3">Rugalmas</div>
+      <div class="comp-hc" id="th4">Hőálló</div>
+      <div class="comp-hc" id="th5">Kültér</div>
     </div>
     <!-- PLA: Sz:3 Ru:1 Hő:1 UV:1 -->
     <div class="comp-r">
@@ -713,11 +718,16 @@ footer{padding:1rem 1.2rem;border-top:1px solid #0a1020;display:flex;justify-con
     <div id="form-wrap">
       <h2 id="t-mod-h">Rendelés leadása</h2>
       <p class="modal-sub" id="t-mod-sub">Töltsd ki az alábbi mezőket — visszajelzünk amint tudjuk.</p>
+
+      <!-- KALKULÁTOR PREFILL BADGE -->
       <div class="calc-prefill" id="calc-prefill" style="display:none">
         <span id="t-prefill-label">Kalkulált ár:</span> <strong id="prefill-price">—</strong> &nbsp;·&nbsp;
         <span id="prefill-details">—</span>
       </div>
+
       <form id="order-form" onsubmit="submitOrder(event)">
+
+        <!-- 1. NÉV + EMAIL -->
         <div class="form-row">
           <div class="form-field">
             <label id="t-fn">Teljes név</label>
@@ -728,7 +738,8 @@ footer{padding:1rem 1.2rem;border-top:1px solid #0a1020;display:flex;justify-con
             <input type="email" id="f-email" required placeholder="email@example.com">
           </div>
         </div>
-        <!-- Ha kalkulátorból jön, ez el van rejtve -->
+
+        <!-- 2. ANYAG / SZÍN / INFILL / MENNYISÉG — elrejthető ha kalkulátorból jön -->
         <div id="f-mat-block">
           <div class="form-row">
             <div class="form-field">
@@ -747,7 +758,7 @@ footer{padding:1rem 1.2rem;border-top:1px solid #0a1020;display:flex;justify-con
               <select id="f-col"></select>
             </div>
           </div>
-          <div class="form-row" style="margin-top:0">
+          <div class="form-row">
             <div class="form-field">
               <label id="t-finfill">Kitöltés (infill)</label>
               <select id="f-infill">
@@ -765,28 +776,124 @@ footer{padding:1rem 1.2rem;border-top:1px solid #0a1020;display:flex;justify-con
             </div>
           </div>
         </div>
-        <!-- Ha kalkulátorból jön, csak mennyiség látszik -->
+
+        <!-- Kalkulátorból: csak mennyiség -->
         <div id="f-qty-only" style="display:none">
           <div class="form-field">
             <label id="t-fqty2">Mennyiség (db)</label>
             <input type="number" id="f-qty2" value="1" min="1" max="999">
           </div>
         </div>
+
+        <!-- 3. LEÍRÁS -->
         <div class="form-field">
           <label id="t-fdesc">Leírás / igény</label>
-          <textarea id="f-desc" required placeholder="Pl.: Törött mosógép fogantyú, fekete PLA, 1 db. MakerWorld link: https://..."></textarea>
+          <textarea id="f-desc" required placeholder="Pl.: Törött mosógép fogantyú, 1 db. MakerWorld link: https://..."></textarea>
         </div>
+
+        <!-- 4. FÁJL -->
         <div class="form-field">
           <label id="t-ffile">Fájl csatolása (opcionális)</label>
+          <!-- STL AUTO-ELEMZÉS: itt kell majd bekötni a jövőben -->
           <div class="form-upload" id="form-upload-zone">
             <input type="file" accept=".stl,.obj,.3mf,.step,.zip,.jpg,.jpeg,.png" onchange="handleFormFile(this)">
             <div class="form-upload-txt" id="t-ffile-txt">STL / OBJ / 3MF / STEP / ZIP / Fotó — kattints vagy húzd ide</div>
             <div class="form-upload-ok" id="form-file-ok"></div>
           </div>
         </div>
+
+        <!-- 5. SZÁLLÍTÁSI MÓD — először ezt választja -->
+        <div class="form-field">
+          <label id="t-fship-mode">Szállítási mód</label>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:2px">
+            <label class="ship-opt" id="sopt-personal" onclick="selectShipping('personal')">
+              <input type="radio" name="ship" value="personal" style="display:none">
+              <div class="ship-opt-inner" id="si-personal">
+                <span style="font-size:18px">📍</span>
+                <span id="t-sopt1">Személyes átvétel</span>
+                <span style="font-size:11px;color:#00ff88" id="t-sopt1-p">Ingyenes</span>
+              </div>
+            </label>
+            <label class="ship-opt" id="sopt-courier" onclick="selectShipping('courier')">
+              <input type="radio" name="ship" value="courier" style="display:none">
+              <div class="ship-opt-inner" id="si-courier">
+                <span style="font-size:18px">🚚</span>
+                <span id="t-sopt2">Házhozszállítás</span>
+                <span style="font-size:11px;color:#00b4ff" id="t-sopt2-p">+1 800–2 500 Ft</span>
+              </div>
+            </label>
+            <label class="ship-opt" id="sopt-parcel" onclick="selectShipping('parcel')">
+              <input type="radio" name="ship" value="parcel" style="display:none">
+              <div class="ship-opt-inner" id="si-parcel">
+                <span style="font-size:18px">📦</span>
+                <span id="t-sopt3">Csomagpont</span>
+                <span style="font-size:11px;color:#00b4ff" id="t-sopt3-p">+1 200–1 800 Ft</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- 6a. SZEMÉLYES: nincs extra mező -->
+        <div id="ship-personal-block" style="display:none">
+          <div class="form-field">
+            <div style="background:#00ff8808;border:1px solid #00ff8822;border-radius:8px;padding:.7rem .9rem;font-size:12px;color:#8bafc8;line-height:1.6" id="t-ship-personal-note">
+              📍 Miskolc és környéke — az árajánlatban egyezünk a pontos helyszínről és időpontról.
+            </div>
+          </div>
+        </div>
+
+        <!-- 6b. HÁZHOZSZÁLLÍTÁS: cím mezők -->
+        <div id="ship-courier-block" style="display:none">
+          <div class="form-row">
+            <div class="form-field">
+              <label id="t-f-zip">Irányítószám</label>
+              <input type="text" id="f-zip" placeholder="3525" maxlength="4">
+            </div>
+            <div class="form-field">
+              <label id="t-f-city">Város</label>
+              <input type="text" id="f-city" placeholder="Miskolc">
+            </div>
+          </div>
+          <div class="form-field">
+            <label id="t-f-addr">Utca, házszám</label>
+            <input type="text" id="f-addr" placeholder="Fő utca 12. fszt. 3.">
+          </div>
+          <div class="form-field">
+            <label id="t-f-courier">Futárszolgálat</label>
+            <select id="f-courier">
+              <option value="MPL">MPL Magyar Posta</option>
+              <option value="GLS">GLS</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 6c. CSOMAGPONT: szolgáltató + pontszám -->
+        <div id="ship-parcel-block" style="display:none">
+          <div class="form-row">
+            <div class="form-field">
+              <label id="t-f-parcel-svc">Csomagpont szolgáltató</label>
+              <select id="f-parcel-svc" onchange="updateParcelNote()">
+                <option value="MPL">MPL Posta csomagpont</option>
+                <option value="GLS">GLS csomagpont</option>
+                <option value="Foxpost">Foxpost automata</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label id="t-f-parcel-zip">Irányítószám (kereséshez)</label>
+              <input type="text" id="f-parcel-zip" placeholder="3525" maxlength="4">
+            </div>
+          </div>
+          <div class="form-field">
+            <label id="t-f-parcel-id">Csomagpont neve / azonosítója</label>
+            <input type="text" id="f-parcel-id" placeholder="Pl.: Miskolc - Bajcsy-Zsilinszky u. 7.">
+          </div>
+          <div id="parcel-note" style="background:#00b4ff08;border:1px solid #00b4ff1a;border-radius:8px;padding:.6rem .8rem;font-size:11px;color:#6b8fa8;margin-top:.3rem;line-height:1.5"></div>
+        </div>
+
         <button type="submit" class="form-submit" id="t-fsubmit">Rendelés elküldése →</button>
       </form>
     </div>
+
     <div class="form-success" id="form-success">
       <span class="ok-icon">✅</span>
       <h3 id="t-suc-h">Rendelés elküldve!</h3>
@@ -893,17 +1000,86 @@ function calc(){
   lastCalcResult={price:fmt(total),mat:mat.toUpperCase(),color:colName,weight:w+'g',infill:inf+'%'};
 }
 
-// ── FILE UPLOAD (calc) ──
+// ── FILE UPLOAD (calc) — smart weight estimator ──
 function handleCalcFile(input){
   const f=input.files[0];if(!f)return;
   document.getElementById('calc-u-ok').style.display='flex';
   document.getElementById('calc-u-fn').textContent=f.name+' ('+(f.size/1024/1024).toFixed(2)+' MB)';
   document.getElementById('calc-upload-zone').style.borderColor='#00ff8866';
+  // Smart weight estimate based on file size + user prompt
+  // STL/3MF file size roughly correlates with geometry complexity
+  const sizeMB=f.size/1024/1024;
+  const ext=f.name.split('.').pop().toLowerCase();
+  // Show size prompt panel
+  showWeightPrompt(sizeMB, ext);
 }
+
+function showWeightPrompt(sizeMB, ext){
+  // Estimate weight range from file size (rough heuristic)
+  // Small file (<0.5MB) → likely small object 5–30g
+  // Medium (0.5–5MB) → 20–100g
+  // Large (>5MB) → 50–300g
+  let suggested=30;
+  if(sizeMB<0.5) suggested=15;
+  else if(sizeMB<2) suggested=30;
+  else if(sizeMB<5) suggested=60;
+  else if(sizeMB<15) suggested=120;
+  else suggested=200;
+
+  // Show prompt below upload
+  let panel=document.getElementById('weight-prompt-panel');
+  if(!panel){
+    panel=document.createElement('div');
+    panel.id='weight-prompt-panel';
+    panel.style.cssText='background:#00b4ff0a;border:1px solid #00b4ff22;border-radius:10px;padding:.9rem 1rem;margin-bottom:.8rem;animation:fadeIn .3s ease';
+    document.getElementById('calc-u-ok').after(panel);
+  }
+  const hu=lang==='hu';
+  panel.innerHTML=`
+    <div style="font-size:12px;color:#00b4ff;font-weight:500;margin-bottom:.5rem">
+      🤖 ${hu?'Fájl alapján becsült súly:':'Estimated weight from file:'}
+      <strong style="font-size:15px">${suggested}g</strong>
+    </div>
+    <div style="font-size:11px;color:#8bafc8;margin-bottom:.6rem">
+      ${hu?'Ez egy becslés a fájlméret alapján. Állítsd be pontosabban:':'This is an estimate based on file size. Adjust if you know better:'}
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      ${[10,20,30,50,80,120,200].map(w=>`
+        <button onclick="setWeight(${w})" style="padding:4px 10px;border-radius:6px;border:1px solid ${w===suggested?'#00b4ff':'#0e1a33'};background:${w===suggested?'#00b4ff18':'transparent'};color:${w===suggested?'#00b4ff':'#6b8fa8'};font-size:12px;cursor:pointer;transition:all .2s" id="wpb-${w}">${w}g</button>
+      `).join('')}
+    </div>
+  `;
+  // Auto-set the suggested weight
+  setWeight(suggested);
+}
+
+function setWeight(w){
+  document.getElementById('inp-w').value=w;
+  calc();
+  // highlight selected button
+  [10,20,30,50,80,120,200].forEach(v=>{
+    const btn=document.getElementById('wpb-'+v);
+    if(btn){
+      btn.style.borderColor=v===w?'#00b4ff':'#0e1a33';
+      btn.style.background=v===w?'#00b4ff18':'transparent';
+      btn.style.color=v===w?'#00b4ff':'#6b8fa8';
+    }
+  });
+}
+
 const uz=document.getElementById('calc-upload-zone');
 uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('drag');});
 uz.addEventListener('dragleave',()=>uz.classList.remove('drag'));
-uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('drag');const f=e.dataTransfer.files[0];if(f){document.getElementById('calc-u-ok').style.display='flex';document.getElementById('calc-u-fn').textContent=f.name;uz.style.borderColor='#00ff8866';}});
+uz.addEventListener('drop',e=>{
+  e.preventDefault();uz.classList.remove('drag');
+  const f=e.dataTransfer.files[0];
+  if(f){
+    document.getElementById('calc-u-ok').style.display='flex';
+    document.getElementById('calc-u-fn').textContent=f.name;
+    uz.style.borderColor='#00ff8866';
+    showWeightPrompt(f.size/1024/1024, f.name.split('.').pop().toLowerCase());
+  }
+});
 
 // ── FILE UPLOAD (form) ──
 function handleFormFile(input){
@@ -919,39 +1095,55 @@ function updateFormColors(){
   const key=mat==='PLA'?'pla':mat==='PETG'?'petg':mat==='TPU'?'tpu':mat==='ABS/ASA'?'abs':'nylon';
   const sel=document.getElementById('f-col');
   if(!sel)return;
-  const cols=colorMap[key]?colorMap[key][lang]:[];
+  const cols=(colorMap[key]||{})[lang]||[];
   sel.innerHTML='';
-  cols.forEach(c=>{const o=document.createElement('option');o.value=c.n;o.textContent=c.n;sel.appendChild(o);});
-  // "Nem tudom" esetén nincs szín
-  if(!cols.length){const o=document.createElement('option');o.value='—';o.textContent='—';sel.appendChild(o);}
+  if(cols.length){cols.forEach(c=>{const o=document.createElement('option');o.value=c.n;o.textContent=c.n;sel.appendChild(o);});}
+  else{const o=document.createElement('option');o.value='—';o.textContent='—';sel.appendChild(o);}
 }
 
-// ── ORDER MODAL ──
-function openOrder(){
+// ── SHIPPING MODE ──
+let selectedShipping='';
+function selectShipping(mode){
+  selectedShipping=mode;
+  ['personal','courier','parcel'].forEach(m=>{
+    document.getElementById('si-'+m).classList.toggle('selected',m===mode);
+    document.getElementById('ship-'+m+'-block').style.display=m===mode?'block':'none';
+  });
+}
+
+function updateParcelNote(){
+  const svc=document.getElementById('f-parcel-svc').value;
+  const links={
+    MPL:'https://www.posta.hu/szolgaltatasok/csomagkuldes/csomagpont',
+    GLS:'https://gls-group.com/HU/hu/csomagpont-kereso.html',
+    Foxpost:'https://foxpost.hu/automatak'
+  };
+  const labels={
+    MPL: lang==='hu'?'MPL csomagpontok keresése →':'Search MPL parcel points →',
+    GLS: lang==='hu'?'GLS csomagpontok keresése →':'Search GLS parcel points →',
+    Foxpost: lang==='hu'?'Foxpost automaták keresése →':'Search Foxpost lockers →'
+  };
+  const note=document.getElementById('parcel-note');
+  note.innerHTML='🔍 <a href="'+links[svc]+'" target="_blank" rel="noopener" style="color:#00b4ff;text-decoration:none">'+labels[svc]+'</a>';
+}
+
+// ── ORDER MODAL — UNIFIED OPEN ──
+function _openModal(fromCalc){
   document.getElementById('modal-bg').classList.add('open');
   document.getElementById('form-wrap').style.display='block';
   document.getElementById('form-success').style.display='none';
-  document.getElementById('calc-prefill').style.display='none';
-  // show full form, hide qty-only
-  document.getElementById('f-mat-block').style.display='block';
-  document.getElementById('f-qty-only').style.display='none';
   document.body.style.overflow='hidden';
-  updateFormColors();
-}
-
-function openOrderFromCalc(){
-  document.getElementById('modal-bg').classList.add('open');
-  document.getElementById('form-wrap').style.display='block';
-  document.getElementById('form-success').style.display='none';
-  document.body.style.overflow='hidden';
+  // reset shipping
+  selectedShipping='';
+  ['personal','courier','parcel'].forEach(m=>{
+    document.getElementById('si-'+m).classList.remove('selected');
+    document.getElementById('ship-'+m+'-block').style.display='none';
+  });
   const p=lastCalcResult;
-  if(p.price){
-    // show prefill badge
+  if(fromCalc && p.price){
     document.getElementById('calc-prefill').style.display='block';
     document.getElementById('prefill-price').textContent=p.price;
-    document.getElementById('prefill-details').textContent=
-      p.mat+' · '+p.color+' · '+p.weight+' · Infill: '+p.infill;
-    // hide mat/color/infill block, show only qty
+    document.getElementById('prefill-details').textContent=p.mat+' · '+p.color+' · '+p.weight+' · Infill: '+p.infill;
     document.getElementById('f-mat-block').style.display='none';
     document.getElementById('f-qty-only').style.display='block';
   } else {
@@ -960,36 +1152,57 @@ function openOrderFromCalc(){
     document.getElementById('f-qty-only').style.display='none';
     updateFormColors();
   }
+  updateParcelNote();
 }
+function openOrder(){ _openModal(false); }
+function openOrderFromCalc(){ _openModal(true); }
 
 function closeOrder(){
   document.getElementById('modal-bg').classList.remove('open');
   document.body.style.overflow='';
 }
 
+// ── SUBMIT ──
 function submitOrder(e){
   e.preventDefault();
+  if(!selectedShipping){
+    alert(lang==='hu'?'Kérlek válassz szállítási módot!':'Please select a shipping method!');
+    return;
+  }
   const name=document.getElementById('f-name').value;
   const email=document.getElementById('f-email').value;
   const desc=document.getElementById('f-desc').value;
   const p=lastCalcResult;
+  // product details
   let matLine='';
   let qty='1';
   if(p.price && document.getElementById('f-mat-block').style.display==='none'){
-    // came from calc
     matLine='Alapanyag: '+p.mat+'\nSzín: '+p.color+'\nSúly: '+p.weight+'\nInfill: '+p.infill+'\nKalkulált ár: '+p.price;
     qty=document.getElementById('f-qty2').value;
   } else {
-    const mat=document.getElementById('f-mat').value;
-    const col=document.getElementById('f-col')?.value||'—';
-    const infill=document.getElementById('f-infill')?.value||'—';
-    matLine='Alapanyag: '+mat+'\nSzín: '+col+'\nInfill: '+infill;
+    matLine='Alapanyag: '+document.getElementById('f-mat').value+
+      '\nSzín: '+(document.getElementById('f-col')?.value||'—')+
+      '\nInfill: '+(document.getElementById('f-infill')?.value||'—');
     qty=document.getElementById('f-qty').value;
   }
+  // shipping details
+  let shipLine='\n\nSzállítás: ';
+  if(selectedShipping==='personal'){
+    shipLine+='Személyes átvétel (Miskolc és környéke)';
+  } else if(selectedShipping==='courier'){
+    const zip=document.getElementById('f-zip').value;
+    const city=document.getElementById('f-city').value;
+    const addr=document.getElementById('f-addr').value;
+    const courier=document.getElementById('f-courier').value;
+    shipLine+=courier+' házhozszállítás\nCím: '+zip+' '+city+', '+addr;
+  } else if(selectedShipping==='parcel'){
+    const svc=document.getElementById('f-parcel-svc').value;
+    const pid=document.getElementById('f-parcel-id').value;
+    const pzip=document.getElementById('f-parcel-zip').value;
+    shipLine+=svc+' csomagpont\nCsomagpont: '+pid+(pzip?' ('+pzip+')':'');
+  }
   const subject=encodeURIComponent('Print3DLab rendelés — '+name);
-  const body=encodeURIComponent(
-    'Név: '+name+'\nEmail: '+email+'\nMennyiség: '+qty+' db\n'+matLine+'\n\nLeírás / igény:\n'+desc
-  );
+  const body=encodeURIComponent('Név: '+name+'\nEmail: '+email+'\nMennyiség: '+qty+' db\n'+matLine+'\n\nLeírás:\n'+desc+shipLine);
   window.location.href='mailto:hello@print3dlab.hu?subject='+subject+'&body='+body;
   setTimeout(()=>{
     document.getElementById('form-wrap').style.display='none';
@@ -997,7 +1210,6 @@ function submitOrder(e){
     lastCalcResult={price:'',mat:'',color:'',weight:'',infill:''};
   },500);
 }
-// ESC to close
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeOrder();});
 
 // ── LIVE COUNTER ──
@@ -1039,7 +1251,7 @@ const T={
     't-rship':'🚚 Szállítás (MPL / GLS)','rv-ship':'+1 800 – 2 500 Ft',
     't-cal-note':'Fix díj, súly és beállítások alapján. Személyes átvétel esetén szállítási díj nem merül fel.',
     't-order-calc':'📧 Rendelés — ár átvitele →','t-em-q':'Kérdésem van',
-    th0:'Anyag',th2:'Szilárdság',th3:'Rugalmasság',th4:'Hőállóság',th5:'Kültér/UV',
+    th0:'Anyag',th2:'Szilárd',th3:'Rugalmas',th4:'Hőálló',th5:'Kültér',
     't-rev-ey':'Vélemények','t-rev-t':'Mit mondanak a vevők',
     tr1:'"Törött alkatrészt nyomtattak nekem, pontosan passzolt. Hamar megérkezett — az ár is meglepett."',trb1:'✓ Visszatérő vevő',
     tr2:'"Kaptam egy videót a nyomtatásról — teljesen lenyűgözött. Ajándékba rendeltem, a barátom imádta!"',trb2:'✓ Ellenőrzött vásárló',
@@ -1066,6 +1278,14 @@ const T={
     't-suc-h':'Rendelés elküldve!','t-suc-p':'Hamarosan visszajelzünk árajánlattal. Addig is nézz körül a MakerWorldön!',
     't-suc-btn':'Bezárás',
     't-rev-form-ey':'Értékelés írása','t-rev-form-t':'Voltál már nálunk? Oszd meg a tapasztalatod!',
+    't-fship-mode':'Szállítási mód',
+    't-sopt1':'Személyes átvétel','t-sopt1-p':'Ingyenes',
+    't-sopt2':'Házhozszállítás','t-sopt2-p':'+1 800–2 500 Ft',
+    't-sopt3':'Csomagpont','t-sopt3-p':'+1 200–1 800 Ft',
+    't-ship-personal-note':'📍 Miskolc és környéke — az árajánlatban egyezünk a pontos helyszínről és időpontról.',
+    't-f-zip':'Irányítószám','t-f-city':'Város','t-f-addr':'Utca, házszám','t-f-courier':'Futárszolgálat',
+    't-f-parcel-svc':'Csomagpont szolgáltató','t-f-parcel-zip':'Irányítószám (kereséshez)',
+    't-f-parcel-id':'Csomagpont neve / azonosítója',
     't-rv-name':'Neved','t-rv-loc':'Helyszín','t-rv-stars':'Értékelés','t-rv-text':'Vélemény',
     't-rv-submit':'Értékelés elküldése →',
     't-rv-note':'Az értékelés jóváhagyás után jelenik meg. Csak valódi vevőktől fogadjuk el.',
@@ -1143,6 +1363,14 @@ const T={
     't-suc-h':'Order sent!','t-suc-p':"We'll reply with a quote soon. In the meantime, browse MakerWorld!",
     't-suc-btn':'Close',
     't-rev-form-ey':'Leave a review','t-rev-form-t':'Been a customer? Share your experience!',
+    't-fship-mode':'Shipping method',
+    't-sopt1':'Local pickup','t-sopt1-p':'Free',
+    't-sopt2':'Home delivery','t-sopt2-p':'+1,800–2,500 HUF',
+    't-sopt3':'Parcel point','t-sopt3-p':'+1,200–1,800 HUF',
+    't-ship-personal-note':'📍 Miskolc and surroundings — we agree on the exact location and time in the quote.',
+    't-f-zip':'Postal code','t-f-city':'City','t-f-addr':'Street, house number','t-f-courier':'Courier service',
+    't-f-parcel-svc':'Parcel service','t-f-parcel-zip':'Postal code (for search)',
+    't-f-parcel-id':'Parcel point name / ID',
     't-rv-name':'Your name','t-rv-loc':'Location','t-rv-stars':'Rating','t-rv-text':'Review',
     't-rv-submit':'Submit review →',
     't-rv-note':'Reviews appear after approval. Only accepted from real customers.',
